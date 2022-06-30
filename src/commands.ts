@@ -18,7 +18,6 @@ type CommandsCollection = Collection<string, Command>
 
 async function registerCommands(botToken: string, clientId: string, projectMetaURL: string, guildId?: string) {
   const commandsDirectory = fileURLToPath(new URL('commands', projectMetaURL))
-  console.log(commandsDirectory)
   const commandFiles = await readdir(commandsDirectory)
 
   const commands: CommandsCollection = new Collection()
