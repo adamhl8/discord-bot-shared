@@ -10,6 +10,7 @@ interface CommandImport {
 }
 
 interface Command {
+  requiredRoles?: string[]
   command: SlashCommandBuilder
   run: (interaction: CommandInteraction) => void | Promise<void>
 }
@@ -17,11 +18,13 @@ interface Command {
 type CommandsCollection = Collection<string, Command>
 
 async function registerCommands(botToken: string, clientId: string, projectMetaURL: string, guildId?: string) {
-  const commandsDirectory = fileURLToPath(new URL('commands', projectMetaURL))
-  const commandFiles = await readdir(commandsDirectory)
-
   const commands: CommandsCollection = new Collection()
   const commandData: RESTPostAPIApplicationCommandsJSONBody[] = []
+
+  const commandsDirectory = fileURLToPath(new URL('commands', projectMetaURL))
+  const commandFiles = await readdir(commandsDirectory).catch(console.error)
+  if (!commandFiles) return commands
+
   for (const file of commandFiles) {
     const { default: command } = (await import(`${commandsDirectory}/${file}`)) as CommandImport
     commands.set(command.command.name, command)

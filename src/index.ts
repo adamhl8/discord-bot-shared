@@ -1,6 +1,7 @@
 import { Client, ClientOptions } from 'discord.js'
 import registerCommands from './commands.js'
 import registerEvents from './events.js'
+import { setBot } from './guildCache.js'
 import registerInteractionCreate, { InteractionCheck } from './interactionCreate.js'
 import registerReady from './ready.js'
 
@@ -20,10 +21,13 @@ async function login(
   registerInteractionCreate(bot, commands, interactionCheck)
   void registerEvents(projectMetaURL)
 
+  setBot(bot)
+
   void bot.login(botToken)
   return bot
 }
 
+export default login
 export { Command } from './commands.js'
+export { default as getGuildCache } from './guildCache.js'
 export { InteractionCheck } from './interactionCreate.js'
-export { login }
