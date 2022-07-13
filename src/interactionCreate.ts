@@ -18,7 +18,7 @@ function registerInteractionCreate(bot: Client, commands: CommandsCollection, in
         !member.roles.cache.some((role) => (command.requiredRoles ? command.requiredRoles.includes(role.name) : false))
       )
         return await interaction
-          .reply({ content: 'You do not have the required role(s) to run this command.', ephemeral: true })
+          .reply({ content: 'You do not have one of the required roles to run this command.', ephemeral: true })
           .catch(console.error)
     }
 
