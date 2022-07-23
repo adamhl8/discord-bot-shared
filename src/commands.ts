@@ -1,7 +1,6 @@
-import { SlashCommandBuilder } from '@discordjs/builders'
 import { REST } from '@discordjs/rest'
 import { RESTPostAPIApplicationCommandsJSONBody, Routes } from 'discord-api-types/v10'
-import { Collection, CommandInteraction } from 'discord.js'
+import { ChatInputCommandInteraction, Collection, SlashCommandBuilder } from 'discord.js'
 import { readdir } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 
@@ -12,7 +11,7 @@ interface CommandImport {
 interface Command {
   requiredRoles?: string[]
   command: SlashCommandBuilder
-  run: (interaction: CommandInteraction) => void | Promise<void>
+  run: (interaction: ChatInputCommandInteraction) => void | Promise<void>
 }
 
 type CommandsCollection = Collection<string, Command>
@@ -22,7 +21,7 @@ async function registerCommands(botToken: string, clientId: string, projectMetaU
   const commandData: RESTPostAPIApplicationCommandsJSONBody[] = []
 
   const commandsDirectory = fileURLToPath(new URL('commands', projectMetaURL))
-  const commandFiles = await readdir(commandsDirectory).catch(console.error)
+  const commandFiles = await readdir(commandsDirectory)
   if (!commandFiles) return commands
 
   for (const file of commandFiles) {
@@ -32,9 +31,9 @@ async function registerCommands(botToken: string, clientId: string, projectMetaU
   }
 
   const rest = new REST().setToken(botToken)
-  if (guildId)
-    await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commandData }).catch(console.error)
-  else rest.put(Routes.applicationCommands(clientId), { body: commandData }).catch(console.error)
+  guildId
+    ? await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commandData })
+    : await rest.put(Routes.applicationCommands(clientId), { body: commandData })
   console.log('Registered application (/) commands.')
 
   return commands

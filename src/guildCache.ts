@@ -9,23 +9,21 @@ function setBot(botClient: Client) {
 async function getGuildCache(baseGuild?: Guild) {
   if (!bot) return
 
-  const guilds = await bot.guilds.fetch().catch(console.error)
+  const guilds = await bot.guilds.fetch()
   if (!guilds) return
-  const guild = baseGuild
-    ? await baseGuild.fetch().catch(console.error)
-    : await guilds.first()?.fetch().catch(console.error)
+  const guild = baseGuild ? await baseGuild.fetch() : await guilds.first()?.fetch()
   if (!guild) return
 
-  const channels = await guild.channels.fetch().catch(console.error)
+  const channels = await guild.channels.fetch()
   if (!channels) return
 
-  const emojis = await guild.emojis.fetch().catch(console.error)
+  const emojis = await guild.emojis.fetch()
   if (!emojis) return
 
-  const members = await guild.members.fetch().catch(console.error)
+  const members = await guild.members.fetch()
   if (!members) return
 
-  const roles = await guild.roles.fetch().catch(console.error)
+  const roles = await guild.roles.fetch()
   if (!roles) return
 
   return {
