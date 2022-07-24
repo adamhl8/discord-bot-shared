@@ -8,13 +8,10 @@ function registerInteractionCreate(bot: Client, commands: CommandsCollection, in
     if (!interaction.isChatInputCommand()) return
 
     const command = commands.get(interaction.commandName)
-    if (!command)
-      return void interaction.reply({ content: 'Unable to get command.', ephemeral: true }).catch(console.error)
+    if (!command) return interactionReply(interaction, 'Unable to get command.')
 
     if (!(await checkRoles(command, interaction)))
-      return void interaction
-        .reply({ content: 'You do not have one of the required roles to run this command.', ephemeral: true })
-        .catch(console.error)
+      return interactionReply(interaction, 'You do not have one of the required roles to run this command.')
 
     try {
       const interactionCheckPassed = interactionCheck ? await interactionCheck(interaction) : true
@@ -23,9 +20,7 @@ function registerInteractionCreate(bot: Client, commands: CommandsCollection, in
       await command.run(interaction)
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : ''
-      await interaction
-        .reply({ content: `There was an error while running this command.\n${errorMessage}`, ephemeral: true })
-        .catch(console.error)
+      interactionReply(interaction, `There was an error while running this command.\n${errorMessage}`)
     }
   })
 }
@@ -41,6 +36,12 @@ async function checkRoles(command: Command, interaction: ChatInputCommandInterac
   }
 
   return false
+}
+
+function interactionReply(interaction: ChatInputCommandInteraction, message: string) {
+  interaction.deferred
+    ? void interaction.editReply(message).catch(console.error)
+    : void interaction.reply({ content: message, ephemeral: true }).catch(console.error)
 }
 
 export default registerInteractionCreate
