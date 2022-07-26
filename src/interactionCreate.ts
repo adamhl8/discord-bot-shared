@@ -26,7 +26,9 @@ function registerInteractionCreate(bot: Client, commands: CommandsCollection, in
 }
 
 async function checkRoles(command: Command, interaction: ChatInputCommandInteraction) {
-  if (command.requiredRoles && command.requiredRoles.length > 0) {
+  if (!command.requiredRoles) return true
+
+  if (command.requiredRoles.length > 0) {
     const member = await interaction.guild?.members.fetch(interaction.user).catch(console.error)
     if (!member) return
 
