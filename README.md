@@ -61,7 +61,9 @@ import { Command } from 'discord-bot-shared'
 import { CommandInteraction, SlashCommandBuilder } from 'discord.js'
 
 const myCommand: Command = {
-  command: new SlashCommandBuilder().setName('my-command').setDescription('This command does stuff.'),
+  command: new SlashCommandBuilder()
+    .setName('my-command')
+    .setDescription('This command does stuff.') as SlashCommandBuilder,
   run: (interaction: CommandInteraction) => {
     // do stuff
   },
@@ -70,7 +72,7 @@ const myCommand: Command = {
 export default myCommand
 ```
 
-See below for more info on this.
+Your `run` function is passed the command interaction that initiated the command.
 
 ### Exports
 
@@ -78,9 +80,9 @@ The following functions and interfaces/types are exported by this module:
 
 ```
 async function login(
-botIntents: ClientOptions,
-projectMetaURL: string,
-interactionCheck?: InteractionCheck,
+  botIntents: ClientOptions,
+  projectMetaURL: string,
+  interactionCheck?: InteractionCheck,
 ): Promise<Client>
 ```
 
@@ -111,9 +113,9 @@ This interface defines the structure of your bot's commands. See above for an ex
 
 ```
 interface Command {
-requiredRoles?: string[]
-command: SlashCommandBuilder
-run: (interaction: ChatInputCommandInteraction) => void | Promise<void>
+  requiredRoles?: string[]
+  command: SlashCommandBuilder
+  run: (interaction: ChatInputCommandInteraction) => void | Promise<void>
 }
 ```
 
