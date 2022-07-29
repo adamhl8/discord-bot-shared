@@ -9,7 +9,7 @@ npm install discord-bot-shared
 ```
 
 - This module expects a `BOT_TOKEN` and `CLIENT_ID` environment variable to login.
-- By default, commands are registered globally. To register commands to a specific guild, you can optionally provide `GUILD_ID`.
+  - By default, commands are registered globally. To register commands to a specific guild, you can optionally provide `GUILD_ID`.
 
 ```
 // index.ts
@@ -26,7 +26,7 @@ const bot = await login(botIntents, import.meta.url)
 export default bot
 ```
 
-**You must have directory named `events` and `commands` next to your `index.ts` (or where ever you are importing `login()` from).**
+**You must have a directory names `events` and `commands` next to your `index.ts` (or wherever you are importing `login()` from).**
 
 ```
 .
