@@ -58,13 +58,13 @@ Your commands are registered by `import`ing the default export of each command f
 ```
 // myCommand.ts
 import { Command } from 'discord-bot-shared'
-import { CommandInteraction, SlashCommandBuilder } from 'discord.js'
+import { SlashCommandBuilder } from 'discord.js'
 
 const myCommand: Command = {
   command: new SlashCommandBuilder()
     .setName('my-command')
     .setDescription('This command does stuff.') as SlashCommandBuilder,
-  run: (interaction: CommandInteraction) => {
+  run: (interaction) => {
     // do stuff
   },
 }
