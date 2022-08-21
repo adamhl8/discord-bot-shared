@@ -8,14 +8,18 @@ type NonThreadGuildBasedChannelType =
   | ChannelType.GuildStageVoice
   | ChannelType.GuildCategory
 
-async function getChannelByName<T extends NonThreadGuildBasedChannel>(
-  channelName: string,
+async function getChannel<T extends NonThreadGuildBasedChannel>(
+  channelNameOrId: string,
   channelType: NonThreadGuildBasedChannelType,
 ): Promise<T | undefined> {
   const { channels } = (await getGuildCache()) || throwError('Unable to get guild cache.')
-  const channel = channels.find((channel) => channel.name === channelName)
 
-  return channel && channel.type === channelType ? (channel as T) : undefined
+  let channel: NonThreadGuildBasedChannel | undefined
+  channel = channels.find((channel) => channel.name === channelNameOrId)
+  if (channel) return channel.type === channelType ? (channel as T) : undefined
+
+  channel = channels.get(channelNameOrId)
+  if (channel) return channel.type === channelType ? (channel as T) : undefined
 }
 
 function isTextChannel(channel: BaseChannel | APIPartialChannel): channel is TextChannel {
@@ -30,4 +34,4 @@ function throwError(error: string): never {
   throw new Error(error)
 }
 
-export { getChannelByName, isTextChannel, isCategoryChannel, throwError }
+export { getChannel, isTextChannel, isCategoryChannel, throwError }

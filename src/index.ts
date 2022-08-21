@@ -27,4 +27,4 @@ export default login
 export { Command } from './commands.js'
 export { default as getGuildCache } from './guildCache.js'
 export { InteractionCheck } from './interactionCreate.js'
-export { getChannelByName, isCategoryChannel, isTextChannel, throwError } from './util.js'
+export { getChannel, isCategoryChannel, isTextChannel, throwError } from './util.js'

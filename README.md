@@ -134,11 +134,11 @@ interface Command {
 
 #### `function getChannelByName`
 
-Returns a guild channel of the given name and type, otherwise returns `undefined`.
+Returns the guild channel of the given name/ID and type, otherwise returns `undefined`.
 
 ```
-async function getChannelByName<T extends NonThreadGuildBasedChannel>(
-  channelName: string,
+async function getChannel<T extends NonThreadGuildBasedChannel>(
+  channelNameOrId: string,
   channelType: NonThreadGuildBasedChannelType,
 ): Promise<T | undefined>
 ```
@@ -149,7 +149,7 @@ async function getChannelByName<T extends NonThreadGuildBasedChannel>(
 - For example:
 
 ```
-const someTextChannel = await getChannelByName<TextChannel>('some-text-channel', ChannelType.GuildText)
+const someTextChannel = await getChannel<TextChannel>('some-text-channel', ChannelType.GuildText)
 ```
 
 ---
