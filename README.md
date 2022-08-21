@@ -78,6 +78,8 @@ Your `run` function is passed the command interaction that initiated the command
 
 The following functions and interfaces/types are exported by this module:
 
+---
+
 #### `function login`
 
 ```
@@ -92,6 +94,8 @@ async function login(
 - `projectMetaURL` should always be passed `import.meta.url`. This is used to find and register your events and commands.
 - Optionally provide an `interactionCheck` function that returns a boolean. This function is called right before trying to run a command. The command will only run if `interactionCheck` returns true.
   - The `InteractionCheck` type is also exported by this module.
+
+---
 
 #### `function getGuildCache`
 
@@ -108,6 +112,8 @@ const { members } = await getGuildCache()
 // do stuff with members
 ```
 
+---
+
 #### `interface Command`
 
 This interface defines the structure of your bot's commands. See above for an example of a command.
@@ -123,6 +129,8 @@ interface Command {
 - Optionally provide `requiredRoles` string array. If the member initiating the command has _any_ of the roles provided in this array, they will be allowed to run the command.
 - **You may have to type cast your command `as SlashCommandBuilder` due to the way discord.js' `SlashCommandBuilder` works.**
 - `run` is the final function that will be called to run your command.
+
+---
 
 #### `function getChannelByName`
 
