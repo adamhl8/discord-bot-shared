@@ -151,3 +151,19 @@ async function getChannelByName<T extends NonThreadGuildBasedChannel>(
 ```
 const someTextChannel = await getChannelByName<TextChannel>('some-text-channel', ChannelType.GuildText)
 ```
+
+---
+
+#### Channel Type Guards
+
+These are channel type guards that you may need to use.
+
+```
+function isTextChannel(channel: BaseChannel | APIPartialChannel): channel is TextChannel
+```
+
+```
+function isCategoryChannel(channel: BaseChannel): channel is CategoryChannel
+```
+
+- Almost every channel type in discord.js extends `BaseChannel`, so you should be able to pass in whatever channel you need to here.
