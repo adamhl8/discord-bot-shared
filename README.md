@@ -78,6 +78,8 @@ Your `run` function is passed the command interaction that initiated the command
 
 The following functions and interfaces/types are exported by this module:
 
+#### `function login`
+
 ```
 async function login(
   botIntents: ClientOptions,
@@ -91,15 +93,14 @@ async function login(
 - Optionally provide an `interactionCheck` function that returns a boolean. This function is called right before trying to run a command. The command will only run if `interactionCheck` returns true.
   - The `InteractionCheck` type is also exported by this module.
 
----
+#### `function getGuildCache`
 
 Returns an object that contains the guild and the following freshly fetched guild collections: `channels, emojis, members, roles`.
 
 ```
-async function getGuildCache(baseGuild?: Guild)
+async function getGuildCache()
 ```
 
-- Optionally provide a Guild to retrieve the caches from. Otherwise, the first guild on the bot is used.
 - For example, a common pattern I use is something like this:
 
 ```
@@ -107,7 +108,7 @@ const { members } = await getGuildCache()
 // do stuff with members
 ```
 
----
+#### `interface Command`
 
 This interface defines the structure of your bot's commands. See above for an example of a command.
 
@@ -123,16 +124,22 @@ interface Command {
 - **You may have to type cast your command `as SlashCommandBuilder` due to the way discord.js' `SlashCommandBuilder` works.**
 - `run` is the final function that will be called to run your command.
 
----
+#### `function getChannelByName`
 
-These are type guards that you will likely need to use.
-
-```
-function isTextChannel(channel: BaseChannel | APIPartialChannel): channel is TextChannel
-```
+Returns a guild channel of the given name and type, otherwise returns `undefined`.
 
 ```
-function isCategoryChannel(channel: BaseChannel): channel is CategoryChannel
+async function getChannelByName<T extends NonThreadGuildBasedChannel>(
+  channelName: string,
+  channelType: NonThreadGuildBasedChannelType,
+): Promise<T | undefined>
 ```
 
-- Almost every channel type in discord.js extends `BaseChannel`, so you should be able to pass in whatever channel you need to here.
+- `T` can be one of `TextChannel | VoiceChannel | NewsChannel | StageChannel | CategoryChannel`.
+- `channelType` is a discord.js `ChannelType`. Can be one of `GuildText | GuildVoice | GuildNews | GuildStageVoice | GuildCategory` (prepended with `ChannelType`).
+- It is intended that you pass in a type for `T` that matches `channelType`. The returned channel is cast as whatever type is passed in.
+- For example:
+
+```
+const someTextChannel = await getChannelByName<TextChannel>('some-text-channel', ChannelType.GuildText)
+```
