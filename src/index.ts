@@ -9,11 +9,7 @@ const botToken = process.env.BOT_TOKEN || ''
 const clientId = process.env.CLIENT_ID || ''
 const guildId = process.env.GUILD_ID || ''
 
-async function login(
-  botIntents: ClientOptions,
-  projectMetaURL: string,
-  interactionCheck?: InteractionCheck,
-): Promise<Client> {
+async function login(botIntents: ClientOptions, projectMetaURL: string, interactionCheck?: InteractionCheck): Promise<Client> {
   const bot = new Client(botIntents)
   const commands = await registerCommands(botToken, clientId, projectMetaURL, guildId)
 
@@ -31,4 +27,4 @@ export default login
 export { Command } from './commands.js'
 export { default as getGuildCache } from './guildCache.js'
 export { InteractionCheck } from './interactionCreate.js'
-export { isCategoryChannel, isTextChannel, throwError } from './util.js'
+export { getChannelByName, throwError } from './util.js'

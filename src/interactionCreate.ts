@@ -32,9 +32,7 @@ async function checkRoles(command: Command, interaction: ChatInputCommandInterac
     const member = await interaction.guild?.members.fetch(interaction.user).catch(console.error)
     if (!member) return
 
-    return member.roles.cache.some((role) =>
-      command.requiredRoles ? command.requiredRoles.includes(role.name) : false,
-    )
+    return member.roles.cache.some((role) => (command.requiredRoles ? command.requiredRoles.includes(role.name) : false))
   }
 
   return false
