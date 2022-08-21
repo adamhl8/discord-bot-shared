@@ -132,7 +132,7 @@ interface Command {
 
 ---
 
-#### `function getChannelByName`
+#### `function getChannel`
 
 Returns the guild channel of the given name/ID and type, otherwise returns `undefined`.
 
