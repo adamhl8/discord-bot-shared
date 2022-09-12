@@ -4,13 +4,11 @@
   "compilerOptions": {
     "outDir": "dist",
     "target": "ES2020",
-    "module": "ESNext",
-    "moduleResolution": "node",
+    "module": "NodeNext",
     "declaration": true,
     "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true,
     "sourceMap": true
   }
 }
