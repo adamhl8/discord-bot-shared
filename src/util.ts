@@ -14,8 +14,8 @@ async function getChannel<T extends NonThreadGuildBasedChannel>(
 ): Promise<T | undefined> {
   const { channels } = (await getGuildCache()) || throwError('Unable to get guild cache.')
 
-  let channel: NonThreadGuildBasedChannel | undefined
-  channel = channels.find((channel) => channel.name === channelNameOrId)
+  let channel: NonThreadGuildBasedChannel | undefined | null
+  channel = channels.find((channel) => (channel ? channel.name === channelNameOrId : false))
   if (channel) return channel.type === channelType ? (channel as T) : undefined
 
   channel = channels.get(channelNameOrId)

@@ -1,6 +1,6 @@
 {
   "name": "discord-bot-shared",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "type": "module",
   "description": "Modules for creating discord bots.",
   "repository": "github:adamhl8/discord-bot-shared",
@@ -19,15 +19,15 @@
   },
   "dependencies": {
     "@discordjs/rest": "^1.1.0",
-    "discord-api-types": "^0.37.9",
-    "discord.js": "^14.3.0"
+    "discord-api-types": "^0.37.10",
+    "discord.js": "^14.4.0"
   },
   "devDependencies": {
     "@types/eslint": "^8.4.6",
-    "@types/node": "^18.7.16",
+    "@types/node": "^18.7.18",
     "@types/prettier": "^2.7.0",
-    "@typescript-eslint/eslint-plugin": "^5.37.0",
-    "@typescript-eslint/parser": "^5.37.0",
+    "@typescript-eslint/eslint-plugin": "^5.38.0",
+    "@typescript-eslint/parser": "^5.38.0",
     "eslint": "^8.23.1",
     "eslint-config-prettier": "^8.5.0",
     "eslint-formatter-pretty": "^4.1.0",
