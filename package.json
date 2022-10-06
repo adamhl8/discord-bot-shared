@@ -16,7 +16,8 @@
   "scripts": {
     "build": "rm -rf dist && pnpm lint && tsc && pnpm format",
     "format": "prettier --write .",
-    "lint": "eslint -f pretty ."
+    "lint": "eslint -f pretty .",
+    "publish": "pnpm build && publish"
   },
   "dependencies": {
     "@discordjs/rest": "^1.2.0",
