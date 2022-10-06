@@ -26,6 +26,7 @@ async function registerCommands(botToken: string, clientId: string, projectMetaU
 
   for (const file of commandFiles) {
     const { default: command } = (await import(`${commandsDirectory}/${file}`)) as CommandImport
+    if (!command) continue
     commands.set(command.command.name, command)
     commandData.push(command.command.toJSON())
   }
