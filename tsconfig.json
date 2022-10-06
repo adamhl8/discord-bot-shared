@@ -1,14 +1,16 @@
 {
-  "include": ["src/**/*"],
+  "include": ["src"],
 
   "compilerOptions": {
     "outDir": "dist",
-    "target": "ES2020",
+    "declarationDir": "dist/types",
+    "target": "ESNext",
     "module": "NodeNext",
     "declaration": true,
+    "inlineSourceMap": true,
     "strict": true,
-    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "sourceMap": true
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true
   }
 }

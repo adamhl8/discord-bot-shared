@@ -1,17 +1,17 @@
-import { ChatInputCommandInteraction, Client } from 'discord.js'
-import { Command, CommandsCollection } from './commands.js'
+import { ChatInputCommandInteraction, Client } from "discord.js"
+import { Command, CommandsCollection } from "./commands.js"
 
 type InteractionCheck = (interaction: ChatInputCommandInteraction) => Promise<boolean | void>
 
 function registerInteractionCreate(bot: Client, commands: CommandsCollection, interactionCheck?: InteractionCheck) {
-  bot.on('interactionCreate', async (interaction) => {
+  bot.on("interactionCreate", async (interaction) => {
     if (!interaction.isChatInputCommand()) return
 
     const command = commands.get(interaction.commandName)
-    if (!command) return interactionReply(interaction, 'Unable to get command.')
+    if (!command) return interactionReply(interaction, "Unable to get command.")
 
     if (!(await checkRoles(command, interaction)))
-      return interactionReply(interaction, 'You do not have one of the required roles to run this command.')
+      return interactionReply(interaction, "You do not have one of the required roles to run this command.")
 
     try {
       const interactionCheckPassed = interactionCheck ? await interactionCheck(interaction) : true
@@ -19,7 +19,7 @@ function registerInteractionCreate(bot: Client, commands: CommandsCollection, in
 
       await command.run(interaction)
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : ''
+      const errorMessage = error instanceof Error ? error.message : ""
       interactionReply(interaction, `There was an error while running this command.\n${errorMessage}`)
     }
   })

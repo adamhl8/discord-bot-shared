@@ -1,6 +1,6 @@
 {
   "name": "discord-bot-shared",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "type": "module",
   "description": "Modules for creating discord bots.",
   "repository": "github:adamhl8/discord-bot-shared",
@@ -13,31 +13,29 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "pnpm lint && tsc",
     "format": "prettier --write .",
-    "lint": "eslint -f pretty"
+    "lint": "eslint -f pretty ."
   },
   "dependencies": {
-    "@discordjs/rest": "^1.1.0",
-    "discord-api-types": "^0.37.10",
-    "discord.js": "^14.4.0"
+    "@discordjs/rest": "^1.2.0",
+    "discord-api-types": "^0.37.12",
+    "discord.js": "^14.5.0"
   },
   "devDependencies": {
-    "@types/eslint": "^8.4.6",
-    "@types/node": "^18.7.18",
-    "@types/prettier": "^2.7.0",
-    "@typescript-eslint/eslint-plugin": "^5.38.0",
-    "@typescript-eslint/parser": "^5.38.0",
-    "eslint": "^8.23.1",
+    "@types/node": "^18.8.3",
+    "@typescript-eslint/eslint-plugin": "^5.39.0",
+    "@typescript-eslint/parser": "^5.39.0",
+    "eslint": "^8.24.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-formatter-pretty": "^4.1.0",
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-sonarjs": "^0.15.0",
-    "eslint-plugin-unicorn": "^43.0.2",
+    "eslint-plugin-unicorn": "^44.0.1",
     "prettier": "^2.7.1",
     "prettier-plugin-organize-imports": "^3.1.1",
     "prettier-plugin-pkg": "^0.17.1",
     "prettier-plugin-sh": "^0.12.8",
-    "typescript": "^4.8.3"
+    "typescript": "^4.8.4"
   }
 }

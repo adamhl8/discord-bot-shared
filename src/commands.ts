@@ -1,8 +1,8 @@
-import { REST } from '@discordjs/rest'
-import { RESTPostAPIApplicationCommandsJSONBody, Routes } from 'discord-api-types/v10'
-import { ChatInputCommandInteraction, Collection, SlashCommandBuilder } from 'discord.js'
-import { readdir } from 'node:fs/promises'
-import { fileURLToPath } from 'node:url'
+import { REST } from "@discordjs/rest"
+import { RESTPostAPIApplicationCommandsJSONBody, Routes } from "discord-api-types/v10"
+import { ChatInputCommandInteraction, Collection, SlashCommandBuilder } from "discord.js"
+import { readdir } from "node:fs/promises"
+import { fileURLToPath } from "node:url"
 
 interface CommandImport {
   default: Command
@@ -20,7 +20,7 @@ async function registerCommands(botToken: string, clientId: string, projectMetaU
   const commands: CommandsCollection = new Collection()
   const commandData: RESTPostAPIApplicationCommandsJSONBody[] = []
 
-  const commandsDirectory = fileURLToPath(new URL('commands', projectMetaURL))
+  const commandsDirectory = fileURLToPath(new URL("commands", projectMetaURL))
   const commandFiles = await readdir(commandsDirectory)
   if (!commandFiles) return commands
 
@@ -34,7 +34,7 @@ async function registerCommands(botToken: string, clientId: string, projectMetaU
   guildId
     ? await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commandData })
     : await rest.put(Routes.applicationCommands(clientId), { body: commandData })
-  console.log('Registered application (/) commands.')
+  console.log("Registered application (/) commands.")
 
   return commands
 }
