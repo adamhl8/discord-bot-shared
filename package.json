@@ -1,19 +1,20 @@
 {
   "name": "discord-bot-shared",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "type": "module",
   "description": "Modules for creating discord bots.",
   "repository": "github:adamhl8/discord-bot-shared",
   "author": "adamhl8",
   "license": "MIT",
   "main": "dist/index.js",
+  "types": "dist/types/index.d.ts",
   "files": [
     "dist/",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
-    "build": "pnpm lint && tsc",
+    "build": "rm -rf dist && pnpm lint && tsc && pnpm format",
     "format": "prettier --write .",
     "lint": "eslint -f pretty ."
   },
