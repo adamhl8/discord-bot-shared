@@ -1,4 +1,12 @@
-import { APIPartialChannel, BaseChannel, CategoryChannel, ChannelType, NonThreadGuildBasedChannel, TextChannel } from "discord.js"
+import {
+  APIPartialChannel,
+  BaseChannel,
+  CategoryChannel,
+  ChannelType,
+  GuildResolvable,
+  NonThreadGuildBasedChannel,
+  TextChannel,
+} from "discord.js"
 import getGuildCache from "./guild-cache.js"
 
 type NonThreadGuildBasedChannelType =
@@ -11,8 +19,9 @@ type NonThreadGuildBasedChannelType =
 async function getChannel<T extends NonThreadGuildBasedChannel>(
   channelNameOrId: string,
   channelType: NonThreadGuildBasedChannelType,
+  guildResolvable: GuildResolvable,
 ): Promise<T | undefined> {
-  const { channels } = (await getGuildCache()) || throwError("Unable to get guild cache.")
+  const { channels } = (await getGuildCache(guildResolvable)) || throwError("Unable to get guild cache.")
 
   let channel: NonThreadGuildBasedChannel | undefined | null
   channel = channels.find((channel) => (channel ? channel.name === channelNameOrId : false))

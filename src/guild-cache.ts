@@ -1,4 +1,4 @@
-import { Client } from "discord.js"
+import { Client, GuildResolvable } from "discord.js"
 
 let bot: Client
 
@@ -6,12 +6,10 @@ function setBot(botClient: Client) {
   bot = botClient
 }
 
-async function getGuildCache() {
+async function getGuildCache(guildResolvable: GuildResolvable) {
   if (!bot) return
 
-  const guilds = await bot.guilds.fetch()
-  if (!guilds) return
-  const guild = await guilds.first()?.fetch()
+  const guild = await bot.guilds.fetch({ guild: guildResolvable })
   if (!guild) return
 
   const channels = await guild.channels.fetch()
