@@ -1,13 +1,13 @@
 import { ChatInputCommandInteraction, Client } from "discord.js"
-import { Command, CommandsCollection } from "./commands.js"
+import { Command, Commands } from "../register-commands.js"
 
 type InteractionCheck = (interaction: ChatInputCommandInteraction) => Promise<boolean | void>
 
-function registerInteractionCreate(bot: Client, commands: CommandsCollection, interactionCheck?: InteractionCheck) {
+function registerInteractionCreate(bot: Client, commands: Commands, interactionCheck?: InteractionCheck) {
   bot.on("interactionCreate", async (interaction) => {
     if (!interaction.isChatInputCommand()) return
 
-    const command = commands.get(interaction.commandName)
+    const command = commands[interaction.commandName]
     if (!command) return interactionReply(interaction, "Unable to get command.")
 
     if (!(await checkRoles(command, interaction)))

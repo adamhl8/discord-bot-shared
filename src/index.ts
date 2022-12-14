@@ -1,30 +1,37 @@
-import { Client, ClientOptions } from "discord.js"
-import registerCommands from "./commands.js"
-import registerEvents from "./events.js"
-import { setBot } from "./guild-cache.js"
-import registerInteractionCreate, { InteractionCheck } from "./interaction-create.js"
-import registerReady from "./ready.js"
+import { Client, ClientOptions, Collection } from "discord.js"
+import registerInteractionCreate, { InteractionCheck } from "./events/interaction-create.js"
+import registerReady from "./events/ready.js"
+import Guild from "./guild.js"
+import registerCommands, { Commands } from "./register-commands.js"
+import registerEvents, { Events } from "./register-events.js"
 
 const botToken = process.env.BOT_TOKEN || ""
 const clientId = process.env.CLIENT_ID || ""
-const guildId = process.env.GUILD_ID || ""
 
-async function login(botIntents: ClientOptions, projectMetaURL: string, interactionCheck?: InteractionCheck): Promise<Client> {
+async function login(botIntents: ClientOptions, commands: Commands, events: Events, interactionCheck?: InteractionCheck) {
+  console.log("Logging in...")
+
   const bot = new Client(botIntents)
-  const commands = await registerCommands(botToken, clientId, projectMetaURL, guildId)
+  await registerCommands(botToken, clientId, commands)
+  registerEvents(bot, events)
 
+  // Register default/built-in events
   registerReady(bot)
   registerInteractionCreate(bot, commands, interactionCheck)
-  void registerEvents(projectMetaURL)
 
-  setBot(bot)
+  await bot.login(botToken)
+  console.log("Logged in.")
 
-  void bot.login(botToken)
-  return bot
+  const partialGuilds = await bot.guilds.fetch()
+  const guildPromises = partialGuilds.map((guildPartial) => guildPartial.fetch())
+  const guilds = await Promise.all(guildPromises)
+  const GuildCollection = new Collection<string, Guild>()
+  for (const guild of guilds) GuildCollection.set(guild.id, new Guild(guild.id, guild))
+
+  return { GuildCollection, bot }
 }
 
 export default login
-export { Command } from "./commands.js"
-export { default as getGuildCache } from "./guild-cache.js"
-export { InteractionCheck } from "./interaction-create.js"
-export { getChannel, isCategoryChannel, isTextChannel, throwError } from "./util.js"
+export { InteractionCheck } from "./events/interaction-create.js"
+export { Command } from "./register-commands.js"
+export { isCategoryChannel, isTextChannel, throwError } from "./util.js"
