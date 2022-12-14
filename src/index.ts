@@ -33,5 +33,6 @@ async function login(botIntents: ClientOptions, commands: Commands, events: Even
 
 export default login
 export { InteractionCheck } from "./events/interaction-create.js"
+export { default as Guild } from "./guild.js"
 export { Command } from "./register-commands.js"
 export { isCategoryChannel, isTextChannel, throwError } from "./util.js"
