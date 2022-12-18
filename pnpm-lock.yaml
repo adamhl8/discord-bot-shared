@@ -2,7 +2,7 @@ lockfileVersion: 5.4
 
 specifiers:
   "@discordjs/rest": ^1.4.0
-  "@types/node": ^18.11.13
+  "@types/node": ^18.11.15
   "@typescript-eslint/eslint-plugin": ^5.46.1
   "@typescript-eslint/parser": ^5.46.1
   discord-api-types: ^0.37.22
@@ -25,7 +25,7 @@ dependencies:
   discord.js: 14.7.1
 
 devDependencies:
-  "@types/node": 18.11.13
+  "@types/node": 18.11.16
   "@typescript-eslint/eslint-plugin": 5.46.1_imrg37k3svwu377c6q7gkarwmi
   "@typescript-eslint/parser": 5.46.1_ha6vam6werchizxrnqvarmz2zu
   eslint: 8.29.0
@@ -215,8 +215,8 @@ packages:
     resolution: { integrity: sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ== }
     dev: true
 
-  /@types/node/18.11.13:
-    resolution: { integrity: sha512-IASpMGVcWpUsx5xBOrxMj7Bl8lqfuTY7FKAnPmu5cHkfQVWF8GulWS1jbRqA934qZL35xh5xN/+Xe/i26Bod4w== }
+  /@types/node/18.11.16:
+    resolution: { integrity: sha512-6T7P5bDkRhqRxrQtwj7vru+bWTpelgtcETAZEUSdq0YISKz8WKdoBukQLYQQ6DFHvU9JRsbFq0JH5C51X2ZdnA== }
 
   /@types/normalize-package-data/2.4.1:
     resolution: { integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw== }
@@ -229,7 +229,7 @@ packages:
   /@types/ws/8.5.3:
     resolution: { integrity: sha512-6YOoWjruKj1uLf3INHH7D3qTXwFfEsg1kf3c0uDdSBJwfa/llkwIjrAGV7j7mVgGNbzTQ3HiHKKDXl6bJPD97w== }
     dependencies:
-      "@types/node": 18.11.13
+      "@types/node": 18.11.16
     dev: false
 
   /@typescript-eslint/eslint-plugin/5.46.1_imrg37k3svwu377c6q7gkarwmi:
