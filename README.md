@@ -1,5 +1,7 @@
 # discord-bot-shared
 
+**This readme is currently out of date.**
+
 A module that makes creating discord.js bots a bit easier.
 
 ## Installation/Usage
