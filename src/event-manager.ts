@@ -1,9 +1,11 @@
-import { Client, ClientEvents } from "discord.js"
+import { Client, ClientEvents, Events } from "discord.js"
 import { DiscordContext } from "./bot.js"
 
-export interface Event<K extends keyof ClientEvents> {
-  name: K
-  handler: (context: EventContext, ...args: ClientEvents[K]) => Promise<void>
+type ValidEvents = Exclude<Events, Events.VoiceServerUpdate | Events.Raw>
+
+export interface Event<N extends ValidEvents = ValidEvents> {
+  event: N
+  handler: (context: EventContext, ...args: ClientEvents[N]) => Promise<void>
 }
 
 export interface EventContext {
@@ -16,8 +18,8 @@ export class EventManager {
   /*
    * Add an event listener
    */
-  add<K extends keyof ClientEvents>(event: Event<K>) {
-    this.discord.client.on(event.name, (...args) => {
+  add<N extends ValidEvents>(event: Event<N>) {
+    this.discord.client.on(event.event, (...args) => {
       const context = {
         client: this.discord.client,
       }

@@ -1,11 +1,12 @@
 {
-  "include": ["src"],
-
+  "include": ["./src/"],
   "compilerOptions": {
-    "outDir": "dist",
+    "outDir": "./dist/",
     "declarationDir": "dist/types",
     "target": "ESNext",
     "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "isolatedModules": true,
     "declaration": true,
     "inlineSourceMap": true,
     "strict": true,

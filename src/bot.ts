@@ -1,5 +1,4 @@
-import { REST } from "@discordjs/rest"
-import { Client, ClientOptions } from "discord.js"
+import { Client, ClientOptions, Events, REST } from "discord.js"
 import { CommandManager } from "./command-manager.js"
 import { EventManager } from "./event-manager.js"
 
@@ -35,7 +34,9 @@ export class Bot {
   }
 
   async login() {
-    this.#discord.client.once("ready", () => console.log("Client is ready."))
+    this.#discord.client.once(Events.ClientReady, () => {
+      console.log("Client is ready.")
+    })
 
     await this.commands._register()
     this.commands._listen()

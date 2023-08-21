@@ -1,5 +1,11 @@
-import { RESTPostAPIChatInputApplicationCommandsJSONBody, Routes } from "discord-api-types/v10"
-import { ChatInputCommandInteraction, Collection, Guild } from "discord.js"
+import {
+  ChatInputCommandInteraction,
+  Collection,
+  Events,
+  Guild,
+  RESTPostAPIChatInputApplicationCommandsJSONBody,
+  Routes,
+} from "discord.js"
 import { DiscordContext } from "./bot.js"
 
 export interface Command {
@@ -44,15 +50,20 @@ export class CommandManager {
   }
 
   _listen() {
-    this.discord.client.on("interactionCreate", async (interaction) => {
+    this.discord.client.on(Events.InteractionCreate, async (interaction) => {
       if (!interaction.guildId) return
       if (!interaction.isChatInputCommand()) return
 
       const command = this.#commands.get(interaction.commandName)
-      if (!command) return this.interactionReply(interaction, "Unable to get command.")
+      if (!command) {
+        this.interactionReply(interaction, "Unable to get command.")
+        return
+      }
 
-      if (!(await this.checkRoles(command, interaction)))
-        return this.interactionReply(interaction, "You do not have one of the required roles to run this command.")
+      if (!(await this.checkRoles(command, interaction))) {
+        this.interactionReply(interaction, "You do not have one of the required roles to run this command.")
+        return
+      }
 
       try {
         const guild = await this.discord.client.guilds.fetch(interaction.guildId)
@@ -79,7 +90,9 @@ export class CommandManager {
       const member = await interaction.guild?.members.fetch(interaction.user).catch(console.error)
       if (!member) return
 
-      return member.roles.cache.some((role) => (command.requiredRoles ? command.requiredRoles.includes(role.name) : false))
+      return member.roles.cache.some((role) =>
+        command.requiredRoles ? command.requiredRoles.includes(role.name) : false,
+      )
     }
 
     return false
