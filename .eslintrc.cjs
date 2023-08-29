@@ -16,13 +16,6 @@ module.exports = {
   ],
   ignorePatterns: [".eslintrc.cjs", "prettier.config.js", "dist"],
   rules: {
-    "unicorn/prevent-abbreviations": [
-      "error",
-      {
-        replacements: {
-          args: false,
-        },
-      },
-    ],
+    "unicorn/prevent-abbreviations": "off",
   },
 }

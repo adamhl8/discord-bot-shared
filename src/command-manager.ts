@@ -2,23 +2,19 @@ import {
   ChatInputCommandInteraction,
   Collection,
   Events,
-  Guild,
   RESTPostAPIChatInputApplicationCommandsJSONBody,
   Routes,
 } from "discord.js"
 import { DiscordContext } from "./bot.js"
+import fetchInteraction, { NonNullChatInputCommandInteraction } from "./fetch-interaction.js"
 
 export interface Command {
   requiredRoles?: string[]
   command: RESTPostAPIChatInputApplicationCommandsJSONBody
-  run: (context: CommandContext, interaction: ChatInputCommandInteraction) => void | Promise<void>
+  run: (interaction: NonNullChatInputCommandInteraction) => void | Promise<void>
 }
 
-export interface CommandContext {
-  guild: Guild
-}
-
-export type CommandHook = (context: CommandContext, interaction: ChatInputCommandInteraction) => Promise<boolean>
+export type CommandHook = (interaction: NonNullChatInputCommandInteraction) => Promise<boolean>
 
 export class CommandManager {
   #commands = new Collection<string, Command>()
@@ -50,9 +46,16 @@ export class CommandManager {
   }
 
   _listen() {
-    this.discord.client.on(Events.InteractionCreate, async (interaction) => {
-      if (!interaction.guildId) return
-      if (!interaction.isChatInputCommand()) return
+    this.discord.client.on(Events.InteractionCreate, async (_interaction) => {
+      if (!_interaction.isChatInputCommand()) return
+
+      let interaction: NonNullChatInputCommandInteraction
+      try {
+        interaction = await fetchInteraction(_interaction)
+      } catch (error) {
+        this.interactionErrorReply(_interaction, error)
+        return
+      }
 
       const command = this.#commands.get(interaction.commandName)
       if (!command) {
@@ -66,28 +69,21 @@ export class CommandManager {
       }
 
       try {
-        const guild = await this.discord.client.guilds.fetch(interaction.guildId)
-
-        const context: CommandContext = {
-          guild,
-        }
-
-        const shouldContinue = this.#globalPreRunHook ? await this.#globalPreRunHook(context, interaction) : true
+        const shouldContinue = this.#globalPreRunHook ? await this.#globalPreRunHook(interaction) : true
         if (!shouldContinue) return
 
-        await command.run(context, interaction)
+        await command.run(interaction)
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : ""
-        this.interactionReply(interaction, `There was an error while running this command.\n${errorMessage}`)
+        this.interactionErrorReply(interaction, error)
       }
     })
   }
 
-  private async checkRoles(command: Command, interaction: ChatInputCommandInteraction) {
+  private async checkRoles(command: Command, interaction: NonNullChatInputCommandInteraction) {
     if (!command.requiredRoles) return true
 
     if (command.requiredRoles.length > 0) {
-      const member = await interaction.guild?.members.fetch(interaction.user).catch(console.error)
+      const member = await interaction.guild.members.fetch(interaction.user).catch(console.error)
       if (!member) return
 
       return member.roles.cache.some((role) =>
@@ -98,9 +94,20 @@ export class CommandManager {
     return false
   }
 
-  private interactionReply(interaction: ChatInputCommandInteraction, message: string) {
+  private interactionReply(
+    interaction: NonNullChatInputCommandInteraction | ChatInputCommandInteraction,
+    message: string,
+  ) {
     interaction.deferred
       ? void interaction.editReply(message).catch(console.error)
       : void interaction.reply({ content: message, ephemeral: true }).catch(console.error)
+  }
+
+  private interactionErrorReply(
+    interaction: NonNullChatInputCommandInteraction | ChatInputCommandInteraction,
+    error: unknown,
+  ) {
+    const errorMessage = error instanceof Error ? error.message : ""
+    this.interactionReply(interaction, `There was an error while running this command.\n\`\`\`${errorMessage}\`\`\``)
   }
 }
