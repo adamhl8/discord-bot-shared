@@ -1,6 +1,4 @@
 import {
-  APIPartialChannel,
-  BaseChannel,
   CategoryChannel,
   ChannelType,
   ForumChannel,
@@ -38,14 +36,6 @@ async function getChannel<T extends keyof ChannelTypeToChannelMap>(
   throwError(`Failed to get channel: ${channelNameOrId}`)
 }
 
-function isTextChannel(channel: BaseChannel | APIPartialChannel): channel is TextChannel {
-  return channel.type === ChannelType.GuildText
-}
-
-function isCategoryChannel(channel: BaseChannel): channel is CategoryChannel {
-  return channel.type === ChannelType.GuildCategory
-}
-
 function throwError(error: string): never {
   throw new Error(error)
 }
@@ -63,4 +53,4 @@ class UserError extends Error {
   }
 }
 
-export { UserError, getChannel, isCategoryChannel, isTextChannel, throwError, throwUserError }
+export { UserError, getChannel, throwError, throwUserError }

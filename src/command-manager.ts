@@ -36,7 +36,7 @@ class CommandManager {
     this.#globalPreRunHook = hook
   }
 
-  async _register() {
+  async register() {
     const payload = this.#commands.map((c) => c.command)
     const route = Routes.applicationCommands(this.#discord.applicationId)
     await this.#discord.rest.put(route, { body: payload })
@@ -44,13 +44,32 @@ class CommandManager {
     console.log(`Registered ${this.#commands.size} (/) commands.`)
   }
 
+  async unregisterGuildCommands() {
+    const guilds = await this.#discord.client.guilds.fetch().catch(console.error)
+    if (!guilds || !this.#discord.client.isReady()) {
+      console.error("Unable to unregister guild commands. Client is not ready. Try running Bot.login() first.")
+      return
+    }
+    for (const guild of guilds.values()) {
+      const route = Routes.applicationGuildCommands(this.#discord.applicationId, guild.id)
+      await this.#discord.rest.put(route, { body: [] })
+      console.log(`Unregistered commands from guild: ${guild.name}`)
+    }
+  }
+
+  async unregisterApplicationCommands() {
+    const route = Routes.applicationCommands(this.#discord.applicationId)
+    await this.#discord.rest.put(route, { body: [] })
+    console.log("Unregistered application commands.")
+  }
+
   _listen() {
     this.#discord.client.on(Events.InteractionCreate, async (interaction) => {
       if (!interaction.isChatInputCommand()) return
       if (!interaction.guildId) return
-      if (!interaction.inCachedGuild()) await interaction.client.guilds.fetch(interaction.guildId)
+      if (!interaction.inCachedGuild()) await interaction.client.guilds.fetch(interaction.guildId).catch(console.error)
       if (!interaction.inCachedGuild()) {
-        this.interactionErrorReply(interaction, "Guild is not cached. Try again.")
+        this.interactionReply(interaction, "Guild is not cached. Try again.")
         return
       }
 
@@ -71,9 +90,10 @@ class CommandManager {
 
         await command.run(interaction)
       } catch (error) {
-        this.interactionErrorReply(interaction, error)
+        this.interactionReply(interaction, error)
       }
     })
+    console.log("Listening for commands.")
   }
 
   private async checkRoles(command: Command, interaction: ChatInputCommandInteraction<"cached">) {
@@ -91,17 +111,16 @@ class CommandManager {
     return false
   }
 
-  private interactionReply(interaction: ChatInputCommandInteraction, message: string) {
+  private interactionReply(interaction: ChatInputCommandInteraction, error: unknown) {
+    let errorMessage = ""
+    if (error instanceof UserError) errorMessage = error.message
+    else if (error instanceof Error && error.stack) errorMessage = error.stack
+    else errorMessage = String(error)
+
+    const message = `There was an error while running this command.\n\`\`\`${errorMessage}\`\`\``
     interaction.deferred
       ? void interaction.editReply(message).catch(console.error)
       : void interaction.reply({ content: message, ephemeral: true }).catch(console.error)
-  }
-
-  private interactionErrorReply(interaction: ChatInputCommandInteraction, error: unknown) {
-    let errorBlock = ""
-    if (error instanceof UserError) errorBlock = `\n\`\`\`${error.message}\`\`\``
-    else if (error instanceof Error) errorBlock = `\n\`\`\`${error.stack}\`\`\``
-    this.interactionReply(interaction, `There was an error while running this command.${errorBlock}`)
   }
 }
 
