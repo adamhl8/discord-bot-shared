@@ -6,16 +6,15 @@ import {
   Routes,
 } from "discord.js"
 import { DiscordContext } from "./bot.js"
-import fetchInteraction, { NonNullChatInputCommandInteraction } from "./fetch-interaction.js"
 import { UserError } from "./util.js"
 
 interface Command {
   requiredRoles?: string[]
   command: RESTPostAPIChatInputApplicationCommandsJSONBody
-  run: (interaction: NonNullChatInputCommandInteraction) => void | Promise<void>
+  run: (interaction: ChatInputCommandInteraction<"cached">) => void | Promise<void>
 }
 
-type CommandHook = (interaction: NonNullChatInputCommandInteraction) => Promise<boolean>
+type CommandHook = (interaction: ChatInputCommandInteraction<"cached">) => Promise<boolean>
 
 class CommandManager {
   #commands = new Collection<string, Command>()
@@ -46,20 +45,18 @@ class CommandManager {
   }
 
   _listen() {
-    this.#discord.client.on(Events.InteractionCreate, async (_interaction) => {
-      if (!_interaction.isChatInputCommand()) return
-
-      let interaction: NonNullChatInputCommandInteraction
-      try {
-        interaction = await fetchInteraction(_interaction)
-      } catch (error) {
-        this.interactionErrorReply(_interaction, error)
+    this.#discord.client.on(Events.InteractionCreate, async (interaction) => {
+      if (!interaction.isChatInputCommand()) return
+      if (!interaction.guildId) return
+      if (!interaction.inCachedGuild()) await interaction.client.guilds.fetch(interaction.guildId)
+      if (!interaction.inCachedGuild()) {
+        this.interactionErrorReply(interaction, "Guild is not cached. Try again.")
         return
       }
 
       const command = this.#commands.get(interaction.commandName)
       if (!command) {
-        this.interactionReply(interaction, "Unable to get command.")
+        this.interactionReply(interaction, `Failed to get command with name: ${interaction.commandName}`)
         return
       }
 
@@ -79,7 +76,7 @@ class CommandManager {
     })
   }
 
-  private async checkRoles(command: Command, interaction: NonNullChatInputCommandInteraction) {
+  private async checkRoles(command: Command, interaction: ChatInputCommandInteraction<"cached">) {
     if (!command.requiredRoles) return true
 
     if (command.requiredRoles.length > 0) {
@@ -94,19 +91,13 @@ class CommandManager {
     return false
   }
 
-  private interactionReply(
-    interaction: NonNullChatInputCommandInteraction | ChatInputCommandInteraction,
-    message: string,
-  ) {
+  private interactionReply(interaction: ChatInputCommandInteraction, message: string) {
     interaction.deferred
       ? void interaction.editReply(message).catch(console.error)
       : void interaction.reply({ content: message, ephemeral: true }).catch(console.error)
   }
 
-  private interactionErrorReply(
-    interaction: NonNullChatInputCommandInteraction | ChatInputCommandInteraction,
-    error: unknown,
-  ) {
+  private interactionErrorReply(interaction: ChatInputCommandInteraction, error: unknown) {
     let errorBlock = ""
     if (error instanceof UserError) errorBlock = `\n\`\`\`${error.message}\`\`\``
     else if (error instanceof Error) errorBlock = `\n\`\`\`${error.stack}\`\`\``
