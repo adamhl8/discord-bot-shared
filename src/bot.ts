@@ -38,9 +38,8 @@ class Bot {
       console.log("Client is ready.")
     })
 
-    await this.commands._register()
     this.commands._listen()
-
+    this.events._listen()
     await this.#discord.client.login(this.#discord.token)
   }
 }
