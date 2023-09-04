@@ -3,33 +3,39 @@ import {
   BaseChannel,
   CategoryChannel,
   ChannelType,
+  ForumChannel,
   Guild,
+  NewsChannel,
   NonThreadGuildBasedChannel,
+  StageChannel,
   TextChannel,
+  VoiceChannel,
 } from "discord.js"
 
-type NonThreadGuildBasedChannelType =
-  | ChannelType.GuildText
-  | ChannelType.GuildVoice
-  | ChannelType.GuildAnnouncement
-  | ChannelType.GuildStageVoice
-  | ChannelType.GuildCategory
+interface ChannelTypeToChannelMap {
+  [ChannelType.GuildCategory]: CategoryChannel
+  [ChannelType.GuildAnnouncement]: NewsChannel
+  [ChannelType.GuildStageVoice]: StageChannel
+  [ChannelType.GuildText]: TextChannel
+  [ChannelType.GuildVoice]: VoiceChannel
+  [ChannelType.GuildForum]: ForumChannel
+}
 
-async function getChannel<T extends NonThreadGuildBasedChannel>(
+async function getChannel<T extends keyof ChannelTypeToChannelMap>(
   guild: Guild,
   channelNameOrId: string,
-  channelType: NonThreadGuildBasedChannelType,
+  channelType: T,
 ) {
   const channels = await guild.channels.fetch()
 
   let channel: NonThreadGuildBasedChannel | undefined | null
   channel = channels.find((channel) => (channel ? channel.name === channelNameOrId : false))
-  if (channel && channel.type === channelType) return channel as T
+  if (channel && channel.type === channelType) return channel as ChannelTypeToChannelMap[T]
 
   channel = channels.get(channelNameOrId)
-  if (channel && channel.type === channelType) return channel as T
+  if (channel && channel.type === channelType) return channel as ChannelTypeToChannelMap[T]
 
-  throw new Error(`Unable to get channel: ${channelNameOrId}`)
+  throwError(`Failed to get channel: ${channelNameOrId}`)
 }
 
 function isTextChannel(channel: BaseChannel | APIPartialChannel): channel is TextChannel {
@@ -44,4 +50,17 @@ function throwError(error: string): never {
   throw new Error(error)
 }
 
-export { getChannel, isCategoryChannel, isTextChannel, throwError }
+function throwUserError(error: string): never {
+  throw new UserError(error)
+}
+
+class UserError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = this.constructor.name
+
+    Object.setPrototypeOf(this, new.target.prototype)
+  }
+}
+
+export { UserError, getChannel, isCategoryChannel, isTextChannel, throwError, throwUserError }

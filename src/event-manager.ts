@@ -3,16 +3,16 @@ import { DiscordContext } from "./bot.js"
 
 type ValidEvents = Exclude<Events, Events.VoiceServerUpdate | Events.Raw>
 
-export interface Event<N extends ValidEvents = ValidEvents> {
+interface Event<N extends ValidEvents = ValidEvents> {
   event: N
   handler: (context: EventContext, ...args: ClientEvents[N]) => Promise<void>
 }
 
-export interface EventContext {
+interface EventContext {
   client: Client
 }
 
-export class EventManager {
+class EventManager {
   constructor(private discord: DiscordContext) {}
 
   /*
@@ -27,3 +27,6 @@ export class EventManager {
     })
   }
 }
+
+export default EventManager
+export type { Event, EventContext }

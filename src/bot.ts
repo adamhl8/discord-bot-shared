@@ -1,21 +1,21 @@
 import { Client, ClientOptions, Events, REST } from "discord.js"
-import { CommandManager } from "./command-manager.js"
-import { EventManager } from "./event-manager.js"
+import CommandManager from "./command-manager.js"
+import EventManager from "./event-manager.js"
 
-export interface BotOptions {
+interface BotOptions {
   applicationId: string
   token: string
   clientOptions: ClientOptions
 }
 
-export interface DiscordContext {
+interface DiscordContext {
   applicationId: string
   token: string
   client: Client
   rest: REST
 }
 
-export class Bot {
+class Bot {
   #discord: DiscordContext
 
   readonly commands: CommandManager
@@ -44,3 +44,6 @@ export class Bot {
     await this.#discord.client.login(this.#discord.token)
   }
 }
+
+export default Bot
+export type { BotOptions, DiscordContext }

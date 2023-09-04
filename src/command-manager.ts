@@ -7,29 +7,29 @@ import {
 } from "discord.js"
 import { DiscordContext } from "./bot.js"
 import fetchInteraction, { NonNullChatInputCommandInteraction } from "./fetch-interaction.js"
+import { UserError } from "./util.js"
 
-export interface Command {
+interface Command {
   requiredRoles?: string[]
   command: RESTPostAPIChatInputApplicationCommandsJSONBody
   run: (interaction: NonNullChatInputCommandInteraction) => void | Promise<void>
 }
 
-export type CommandHook = (interaction: NonNullChatInputCommandInteraction) => Promise<boolean>
+type CommandHook = (interaction: NonNullChatInputCommandInteraction) => Promise<boolean>
 
-export class CommandManager {
+class CommandManager {
   #commands = new Collection<string, Command>()
   #globalPreRunHook?: CommandHook
+  #discord: DiscordContext
 
-  constructor(private discord: DiscordContext) {}
+  constructor(discord: DiscordContext) {
+    this.#discord = discord
+  }
 
   /*
    * Add a command
    */
   add(command: Command) {
-    if (!command.command.name) {
-      throw new Error("a command is missing a name")
-    }
-
     this.#commands.set(command.command.name, command)
   }
 
@@ -39,14 +39,14 @@ export class CommandManager {
 
   async _register() {
     const payload = this.#commands.map((c) => c.command)
-    const route = Routes.applicationCommands(this.discord.applicationId)
-    await this.discord.rest.put(route, { body: payload })
+    const route = Routes.applicationCommands(this.#discord.applicationId)
+    await this.#discord.rest.put(route, { body: payload })
 
     console.log(`Registered ${this.#commands.size} (/) commands.`)
   }
 
   _listen() {
-    this.discord.client.on(Events.InteractionCreate, async (_interaction) => {
+    this.#discord.client.on(Events.InteractionCreate, async (_interaction) => {
       if (!_interaction.isChatInputCommand()) return
 
       let interaction: NonNullChatInputCommandInteraction
@@ -107,7 +107,12 @@ export class CommandManager {
     interaction: NonNullChatInputCommandInteraction | ChatInputCommandInteraction,
     error: unknown,
   ) {
-    const errorMessage = error instanceof Error ? error.message : ""
-    this.interactionReply(interaction, `There was an error while running this command.\n\`\`\`${errorMessage}\`\`\``)
+    let errorBlock = ""
+    if (error instanceof UserError) errorBlock = `\n\`\`\`${error.message}\`\`\``
+    else if (error instanceof Error) errorBlock = `\n\`\`\`${error.stack}\`\`\``
+    this.interactionReply(interaction, `There was an error while running this command.${errorBlock}`)
   }
 }
+
+export default CommandManager
+export type { Command, CommandHook }
