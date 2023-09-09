@@ -45,10 +45,22 @@ class CommandManager {
   }
 
   async unregisterGuildCommands() {
-    const guilds = await this.#discord.client.guilds.fetch().catch(console.error)
-    if (!guilds || !this.#discord.client.isReady()) {
-      console.error("Unable to unregister guild commands. Client is not ready. Try running Bot.login() first.")
-      return
+    if (this.#discord.client.readyAt) {
+      await this._unregisterGuildCommands().catch(console.error)
+    } else {
+      this.#discord.client.once(Events.ClientReady, async () => {
+        await this._unregisterGuildCommands().catch(console.error)
+      })
+    }
+  }
+
+  private async _unregisterGuildCommands() {
+    let guilds
+    try {
+      guilds = await this.#discord.client.guilds.fetch()
+    } catch (error) {
+      console.error("Unable to unregister guild commands. Failed to fetch guilds.")
+      throw error
     }
     for (const guild of guilds.values()) {
       const route = Routes.applicationGuildCommands(this.#discord.applicationId, guild.id)
