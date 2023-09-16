@@ -113,7 +113,7 @@ class CommandManager {
 
     if (command.requiredRoles.length > 0) {
       const member = await interaction.guild.members.fetch(interaction.user).catch(console.error)
-      if (!member) return
+      if (!member) return false
 
       return member.roles.cache.some((role) =>
         command.requiredRoles ? command.requiredRoles.includes(role.name) : false,

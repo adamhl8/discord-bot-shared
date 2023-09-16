@@ -36,10 +36,10 @@ class Bot {
   async login() {
     this.#discord.client.once(Events.ClientReady, () => {
       console.log("Client is ready.")
-      this.commands._listen()
-      this.events._listen()
     })
 
+    this.commands._listen()
+    this.events._listen()
     await this.#discord.client.login(this.#discord.token)
   }
 }
