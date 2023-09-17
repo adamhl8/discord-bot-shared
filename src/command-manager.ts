@@ -6,7 +6,7 @@ import {
   Routes,
 } from "discord.js"
 import { DiscordContext } from "./bot.js"
-import { UserError } from "./util.js"
+import { UserError, throwUserError } from "./util.js"
 
 interface Command {
   requiredRoles?: string[]
@@ -14,11 +14,11 @@ interface Command {
   run: (interaction: ChatInputCommandInteraction<"cached">) => void | Promise<void>
 }
 
-type CommandHook = (interaction: ChatInputCommandInteraction<"cached">) => Promise<boolean>
+type CommandHook = (interaction: ChatInputCommandInteraction<"cached">) => boolean | Promise<boolean>
 
 class CommandManager {
   #commands = new Collection<string, Command>()
-  #globalPreRunHook?: CommandHook
+  #globalCommandHook?: CommandHook
   #discord: DiscordContext
 
   constructor(discord: DiscordContext) {
@@ -32,8 +32,8 @@ class CommandManager {
     this.#commands.set(command.command.name, command)
   }
 
-  setGlobalPreRunHook(hook: CommandHook) {
-    this.#globalPreRunHook = hook
+  setGlobalCommandHook(commandHook: CommandHook) {
+    this.#globalCommandHook = commandHook
   }
 
   async register() {
@@ -97,8 +97,8 @@ class CommandManager {
       }
 
       try {
-        const shouldContinue = this.#globalPreRunHook ? await this.#globalPreRunHook(interaction) : true
-        if (!shouldContinue) return
+        const shouldContinue = this.#globalCommandHook ? await this.#globalCommandHook(interaction) : true
+        if (!shouldContinue) throwUserError("The global command hook returned false.")
 
         await command.run(interaction)
       } catch (error) {

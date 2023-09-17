@@ -3,7 +3,10 @@ import { DiscordContext } from "./bot.js"
 
 type ValidEvents = Exclude<Events, Events.VoiceServerUpdate | Events.Raw>
 
-type EventHandler<E extends ValidEvents = ValidEvents> = (client: Client, ...args: ClientEvents[E]) => Promise<void>
+type EventHandler<E extends ValidEvents = ValidEvents> = (
+  client: Client,
+  ...args: ClientEvents[E]
+) => void | Promise<void>
 
 type EventHandlerMap = {
   [E in ValidEvents]: EventHandler<E>
@@ -32,7 +35,11 @@ class EventManager {
   _listen() {
     for (const event of this.#events) {
       this.#discord.client.on(event.event, async (...args) => {
-        await (event.handler as EventHandler)(this.#discord.client, ...args).catch(console.error)
+        try {
+          await (event.handler as EventHandler)(this.#discord.client, ...args)
+        } catch (error) {
+          console.error(error)
+        }
       })
     }
     console.log(`Listening for (${this.#events.length}) events.`)

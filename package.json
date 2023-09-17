@@ -1,6 +1,6 @@
 {
   "name": "discord-bot-shared",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "type": "module",
   "description": "Modules for creating discord bots.",
   "repository": "github:adamhl8/discord-bot-shared",
@@ -16,7 +16,7 @@
   "scripts": {
     "build": "rm -rf dist && tsc",
     "format": "prettier --write .",
-    "lint": "eslint ./src/",
+    "lint": "tsc --noEmit && eslint ./src/",
     "prepare": "find .githooks -type f -exec ln -srf {} .git/hooks/ \\;",
     "prepublish": "pnpm build"
   },

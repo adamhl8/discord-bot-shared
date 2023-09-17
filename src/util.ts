@@ -36,12 +36,12 @@ async function getChannel<T extends keyof ChannelTypeToChannelMap>(
   throwError(`Failed to get channel: ${channelNameOrId}`)
 }
 
-function throwError(error: string): never {
-  throw new Error(error)
+function throwError(message: string): never {
+  throw new Error(message)
 }
 
-function throwUserError(error: string): never {
-  throw new UserError(error)
+function throwUserError(message: string): never {
+  throw new UserError(message)
 }
 
 class UserError extends Error {
