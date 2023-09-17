@@ -13,7 +13,7 @@ A small package that makes creating [discord.js](https://github.com/discordjs/di
   - [Unregistering commands](#unregistering-commands)
   - [Global Command Hook](#global-command-hook)
 - [Events](#events)
-  - [Listening for event](#listening-for-event)
+  - [Listening for events](#listening-for-events)
   - [Adding and registering events](#adding-and-registering-events)
 - [Error Handling](#error-handling)
   - [Commands](#commands-1)
@@ -173,7 +173,7 @@ It's intended that you throw an error in the case you don't want the command to 
 
 ## Events
 
-### Listening for event
+### Listening for events
 
 You can create an `Event` object that will be added to the bot later.
 
