@@ -3,39 +3,45 @@
   "version": "0.14.0",
   "type": "module",
   "description": "Modules for creating discord bots.",
-  "repository": "github:adamhl8/discord-bot-shared",
-  "author": "adamhl8",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adamhl8/discord-bot-shared"
+  },
+  "homepage": "https://github.com/adamhl8/discord-bot-shared",
+  "bugs": {
+    "url": "https://github.com/adamhl8/discord-bot-shared/issues"
+  },
+  "author": {
+    "email": "adamhl@pm.me",
+    "name": "Adam Langbert",
+    "url": "https://github.com/adamhl8"
+  },
   "license": "MIT",
-  "main": "dist/index.js",
-  "types": "dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
   "files": [
-    "dist/",
-    "README.md",
-    "LICENSE"
+    "dist/"
   ],
   "scripts": {
-    "build": "rm -rf dist && tsc",
-    "format": "prettier --write .",
-    "lint": "tsc --noEmit && eslint ./src/",
+    "bundle": "rm -rf ./dist && bun lint && tsc -p ./tsconfig.build.json",
+    "lint": "tsc --noEmit && prettier --write . && eslint .",
     "prepare": "find .githooks -type f -exec ln -srf {} .git/hooks/ \\;",
-    "prepublish": "pnpm build"
+    "prepublish": "bun bundle"
   },
   "peerDependencies": {
     "discord.js": "^14.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20.6.2",
-    "@typescript-eslint/eslint-plugin": "^6.7.0",
-    "@typescript-eslint/parser": "^6.7.0",
-    "discord.js": "^14.13.0",
-    "eslint": "^8.49.0",
-    "eslint-config-prettier": "^9.0.0",
-    "eslint-plugin-sonarjs": "^0.21.0",
-    "eslint-plugin-unicorn": "^48.0.1",
-    "prettier": "^3.0.3",
-    "prettier-plugin-organize-imports": "^3.2.3",
-    "prettier-plugin-pkg": "^0.18.0",
-    "prettier-plugin-sh": "^0.13.1",
-    "typescript": "^5.2.2"
+    "@types/bun": "^1.2.2",
+    "discord.js": "^14.18.0",
+    "eslint": "^9.20.1",
+    "eslint-config-builder": "^0.17.0",
+    "prettier": "^3.5.1",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.24.1"
   }
 }

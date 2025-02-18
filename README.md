@@ -52,6 +52,7 @@ In **`index.ts`:**
 ```ts
 import Bot from "discord-bot-shared"
 import { ClientOptions, GatewayIntentBits } from "discord.js"
+
 import ping from "./ping"
 
 // Get applicationId and token from environment variables

@@ -1,12 +1,14 @@
-import {
+import type {
   ChatInputCommandInteraction,
-  Collection,
-  Events,
+  Interaction,
   RESTPostAPIChatInputApplicationCommandsJSONBody,
-  Routes,
 } from "discord.js"
-import { DiscordContext } from "./bot.js"
-import { UserError, throwUserError } from "./util.js"
+
+import type { DiscordContext } from "./bot.js"
+
+import { Collection, Events, Routes } from "discord.js"
+
+import { throwUserError, UserError } from "./util.js"
 
 interface Command {
   requiredRoles?: string[]
@@ -17,41 +19,36 @@ interface Command {
 type CommandHook = (interaction: ChatInputCommandInteraction<"cached">) => boolean | Promise<boolean>
 
 class CommandManager {
-  #commands = new Collection<string, Command>()
+  readonly #commands = new Collection<string, Command>()
   #globalCommandHook?: CommandHook
-  #discord: DiscordContext
+  readonly #discord: DiscordContext
 
-  constructor(discord: DiscordContext) {
+  public constructor(discord: DiscordContext) {
     this.#discord = discord
   }
 
   /*
    * Add a command
    */
-  add(command: Command) {
+  public add(command: Command) {
     this.#commands.set(command.command.name, command)
   }
 
-  setGlobalCommandHook(commandHook: CommandHook) {
+  public setGlobalCommandHook(commandHook: CommandHook) {
     this.#globalCommandHook = commandHook
   }
 
-  async register() {
+  public async register() {
     const payload = this.#commands.map((c) => c.command)
     const route = Routes.applicationCommands(this.#discord.applicationId)
     await this.#discord.rest.put(route, { body: payload })
 
-    console.log(`Registered ${this.#commands.size} (/) commands.`)
+    console.log(`Registered ${this.#commands.size.toString()} (/) commands.`)
   }
 
-  async unregisterGuildCommands() {
-    if (this.#discord.client.readyAt) {
-      await this._unregisterGuildCommands().catch(console.error)
-    } else {
-      this.#discord.client.once(Events.ClientReady, async () => {
-        await this._unregisterGuildCommands().catch(console.error)
-      })
-    }
+  public async unregisterGuildCommands() {
+    if (this.#discord.client.readyAt) await this._unregisterGuildCommands()
+    else this.#discord.client.once(Events.ClientReady, () => void this._unregisterGuildCommands())
   }
 
   private async _unregisterGuildCommands() {
@@ -62,37 +59,44 @@ class CommandManager {
       console.error("Unable to unregister guild commands. Failed to fetch guilds.")
       throw error
     }
+
+    const unregisterPromises = []
     for (const guild of guilds.values()) {
       const route = Routes.applicationGuildCommands(this.#discord.applicationId, guild.id)
-      await this.#discord.rest.put(route, { body: [] })
-      console.log(`Unregistered commands from guild: ${guild.name}`)
+      const unregisterGuildCommands = async () => {
+        await this.#discord.rest.put(route, { body: [] })
+        console.log(`Unregistered commands from guild: ${guild.name}`)
+      }
+      unregisterPromises.push(unregisterGuildCommands())
     }
+
+    await Promise.all(unregisterPromises)
   }
 
-  async unregisterApplicationCommands() {
+  public async unregisterApplicationCommands() {
     const route = Routes.applicationCommands(this.#discord.applicationId)
     await this.#discord.rest.put(route, { body: [] })
     console.log("Unregistered application commands.")
   }
 
-  _listen() {
-    this.#discord.client.on(Events.InteractionCreate, async (interaction) => {
+  public _listen() {
+    const listen = async (interaction: Interaction) => {
       if (!interaction.isChatInputCommand()) return
       if (!interaction.guildId) return
       if (!interaction.inCachedGuild()) await interaction.client.guilds.fetch(interaction.guildId).catch(console.error)
       if (!interaction.inCachedGuild()) {
-        this.interactionReply(interaction, "Guild is not cached. Try again.")
+        CommandManager.interactionReply(interaction, "Guild is not cached. Try again.")
         return
       }
 
       const command = this.#commands.get(interaction.commandName)
       if (!command) {
-        this.interactionReply(interaction, `Failed to get command with name: ${interaction.commandName}`)
+        CommandManager.interactionReply(interaction, `Failed to get command with name: ${interaction.commandName}`)
         return
       }
 
-      if (!(await this.checkRoles(command, interaction))) {
-        this.interactionReply(interaction, "You do not have one of the required roles to run this command.")
+      if (!(await CommandManager.checkRoles(command, interaction))) {
+        CommandManager.interactionReply(interaction, "You do not have one of the required roles to run this command.")
         return
       }
 
@@ -102,13 +106,15 @@ class CommandManager {
 
         await command.run(interaction)
       } catch (error) {
-        this.interactionReply(interaction, error)
+        CommandManager.interactionReply(interaction, error)
       }
-    })
+    }
+
+    this.#discord.client.on(Events.InteractionCreate, (interaction) => void listen(interaction))
     console.log("Listening for commands.")
   }
 
-  private async checkRoles(command: Command, interaction: ChatInputCommandInteraction<"cached">) {
+  private static async checkRoles(command: Command, interaction: ChatInputCommandInteraction<"cached">) {
     if (!command.requiredRoles) return true
 
     if (command.requiredRoles.length > 0) {
@@ -123,18 +129,21 @@ class CommandManager {
     return false
   }
 
-  private interactionReply(interaction: ChatInputCommandInteraction, error: unknown) {
-    let errorMessage = ""
+  private static interactionReply(interaction: ChatInputCommandInteraction, error: unknown) {
+    let errorMessage: string
     if (error instanceof UserError) errorMessage = error.message
     else if (error instanceof Error && error.stack) errorMessage = error.stack
     else errorMessage = String(error)
 
     const message = `There was an error while running this command.\n\`\`\`${errorMessage}\`\`\``
-    interaction.deferred
-      ? void interaction.editReply(message).catch(console.error)
-      : void interaction.reply({ content: message, ephemeral: true }).catch(console.error)
+    const handleInteractionReply = async () => {
+      await (interaction.deferred
+        ? interaction.editReply(message).catch(console.error)
+        : interaction.reply({ content: message, ephemeral: true }).catch(console.error))
+    }
+    void handleInteractionReply()
   }
 }
 
-export default CommandManager
+export { CommandManager }
 export type { Command, CommandHook }

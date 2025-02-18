@@ -1,5 +1,6 @@
-import { Client, ClientEvents, Events } from "discord.js"
-import { DiscordContext } from "./bot.js"
+import type { Client, ClientEvents, Events } from "discord.js"
+
+import type { DiscordContext } from "./bot.js"
 
 type ValidEvents = Exclude<Events, Events.VoiceServerUpdate | Events.Raw>
 
@@ -18,31 +19,35 @@ interface SingleEvent<E extends ValidEvents = ValidEvents> {
 }
 
 class EventManager {
-  #events: SingleEvent[] = []
-  #discord: DiscordContext
+  readonly #events: SingleEvent[] = []
+  readonly #discord: DiscordContext
 
-  constructor(discord: DiscordContext) {
+  public constructor(discord: DiscordContext) {
     this.#discord = discord
   }
 
   /*
    * Add an event listener
    */
-  add<N extends ValidEvents>(event: SingleEvent<N>) {
+  public add<N extends ValidEvents>(event: SingleEvent<N>) {
     this.#events.push(event)
   }
 
-  _listen() {
+  public _listen() {
     for (const event of this.#events) {
-      this.#discord.client.on(event.event, async (...args) => {
+      const listen = async (...args: ClientEvents[typeof event.event]) => {
         try {
+          // TS Error: Expression produces a union type that is too complex to represent.
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
           await (event.handler as EventHandler)(this.#discord.client, ...args)
         } catch (error) {
           console.error(error)
         }
-      })
+      }
+
+      this.#discord.client.on(event.event, (...args) => void listen(...args))
     }
-    console.log(`Listening for (${this.#events.length}) events.`)
+    console.log(`Listening for (${this.#events.length.toString()}) events.`)
   }
 }
 
@@ -50,5 +55,5 @@ type Event = {
   [E in ValidEvents]: SingleEvent<E>
 }[ValidEvents]
 
-export default EventManager
+export { EventManager }
 export type { Event }
