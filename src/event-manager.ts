@@ -1,8 +1,8 @@
-import type { Client, ClientEvents, Events } from "discord.js"
+import type { Client, ClientEvents } from "discord.js"
 
 import type { DiscordContext } from "./bot.js"
 
-type ValidEvents = Exclude<Events, Events.VoiceServerUpdate | Events.Raw>
+type ValidEvents = keyof ClientEvents
 
 type EventHandler<E extends ValidEvents = ValidEvents> = (
   client: Client,

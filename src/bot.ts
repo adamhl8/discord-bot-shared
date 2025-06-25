@@ -1,6 +1,4 @@
-import type { ClientOptions } from "discord.js"
-
-import { Client, Events, REST } from "discord.js"
+import { Client, Events, REST, type ClientOptions } from "discord.js"
 
 import { CommandManager } from "./command-manager.js"
 import { EventManager } from "./event-manager.js"

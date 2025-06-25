@@ -1,13 +1,13 @@
-import type {
-  ChatInputCommandInteraction,
-  Interaction,
-  RESTPostAPIChatInputApplicationCommandsJSONBody,
+import {
+  Collection,
+  Events,
+  Routes,
+  type ChatInputCommandInteraction,
+  type Interaction,
+  type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord.js"
 
 import type { DiscordContext } from "./bot.js"
-
-import { Collection, Events, Routes } from "discord.js"
-
 import { throwUserError, UserError } from "./util.js"
 
 interface Command {
