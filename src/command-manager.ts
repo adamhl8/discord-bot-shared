@@ -1,6 +1,7 @@
 import {
   Collection,
   Events,
+  MessageFlags,
   Routes,
   type ChatInputCommandInteraction,
   type Interaction,
@@ -139,7 +140,7 @@ class CommandManager {
     const handleInteractionReply = async () => {
       await (interaction.deferred
         ? interaction.editReply(message).catch(console.error)
-        : interaction.reply({ content: message, ephemeral: true }).catch(console.error))
+        : interaction.reply({ content: message, flags: MessageFlags.Ephemeral }).catch(console.error))
     }
     void handleInteractionReply()
   }
