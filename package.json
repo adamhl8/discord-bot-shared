@@ -27,16 +27,16 @@
     "dist/"
   ],
   "scripts": {
-    "bundle": "bun lint && rm -rf ./dist && tsc -p ./tsconfig.build.json",
+    "bundle": "rm -rf ./dist && bun lint && tsc -p ./tsconfig.build.json",
     "lint": "tsc --noEmit && biome check --write",
     "prepare": "find .githooks -type f -exec ln -srf {} .git/hooks/ \\;",
-    "prepublish": "bun bundle"
+    "prepublishOnly": "bun bundle"
   },
   "peerDependencies": {
     "discord.js": "^14.0.0"
   },
   "devDependencies": {
-    "@adamhl8/configs": "^0.3.0",
+    "@adamhl8/configs": "^0.4.1",
     "@biomejs/biome": "^2.0.6",
     "@types/bun": "^1.2.17",
     "discord.js": "^14.21.0",

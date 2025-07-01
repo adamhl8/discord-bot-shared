@@ -1,12 +1,11 @@
-import {
-  Collection,
-  Events,
-  MessageFlags,
-  Routes,
-  type ChatInputCommandInteraction,
-  type Interaction,
-  type RESTPostAPIChatInputApplicationCommandsJSONBody,
+import type {
+  ChatInputCommandInteraction,
+  Interaction,
+  OAuth2Guild,
+  RESTPostAPIChatInputApplicationCommandsJSONBody,
+  Snowflake,
 } from "discord.js"
+import { Collection, Events, MessageFlags, Routes } from "discord.js"
 
 import type { DiscordContext } from "./bot.js"
 import { throwUserError, UserError } from "./util.js"
@@ -53,7 +52,7 @@ class CommandManager {
   }
 
   private async _unregisterGuildCommands() {
-    let guilds
+    let guilds: Collection<Snowflake, OAuth2Guild>
     try {
       guilds = await this.#discord.client.guilds.fetch()
     } catch (error) {
@@ -61,7 +60,7 @@ class CommandManager {
       throw error
     }
 
-    const unregisterPromises = []
+    const unregisterPromises: Promise<void>[] = []
     for (const guild of guilds.values()) {
       const route = Routes.applicationGuildCommands(this.#discord.applicationId, guild.id)
       const unregisterGuildCommands = async () => {
@@ -81,6 +80,7 @@ class CommandManager {
   }
 
   public _listen() {
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: ignore
     const listen = async (interaction: Interaction) => {
       if (!interaction.isChatInputCommand()) return
       if (!interaction.guildId) return
