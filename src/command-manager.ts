@@ -10,15 +10,15 @@ import { Collection, Events, MessageFlags, Routes } from "discord.js"
 import type { DiscordContext } from "./bot.js"
 import { throwUserError, UserError } from "./util.js"
 
-interface Command {
+export interface Command {
   requiredRoles?: string[]
   command: RESTPostAPIChatInputApplicationCommandsJSONBody
   run: (interaction: ChatInputCommandInteraction<"cached">) => void | Promise<void>
 }
 
-type CommandHook = (interaction: ChatInputCommandInteraction<"cached">) => boolean | Promise<boolean>
+export type CommandHook = (interaction: ChatInputCommandInteraction<"cached">) => boolean | Promise<boolean>
 
-class CommandManager {
+export class CommandManager {
   readonly #commands = new Collection<string, Command>()
   #globalCommandHook?: CommandHook
   readonly #discord: DiscordContext
@@ -30,15 +30,15 @@ class CommandManager {
   /*
    * Add a command
    */
-  public add(command: Command) {
+  public add(command: Command): void {
     this.#commands.set(command.command.name, command)
   }
 
-  public setGlobalCommandHook(commandHook: CommandHook) {
+  public setGlobalCommandHook(commandHook: CommandHook): void {
     this.#globalCommandHook = commandHook
   }
 
-  public async register() {
+  public async register(): Promise<void> {
     const payload = this.#commands.map((c) => c.command)
     const route = Routes.applicationCommands(this.#discord.applicationId)
     await this.#discord.rest.put(route, { body: payload })
@@ -46,12 +46,12 @@ class CommandManager {
     console.log(`Registered ${this.#commands.size.toString()} (/) commands.`)
   }
 
-  public async unregisterGuildCommands() {
+  public async unregisterGuildCommands(): Promise<void> {
     if (this.#discord.client.readyAt) await this._unregisterGuildCommands()
     else this.#discord.client.once(Events.ClientReady, () => void this._unregisterGuildCommands())
   }
 
-  private async _unregisterGuildCommands() {
+  private async _unregisterGuildCommands(): Promise<void> {
     let guilds: Collection<Snowflake, OAuth2Guild>
     try {
       guilds = await this.#discord.client.guilds.fetch()
@@ -73,13 +73,13 @@ class CommandManager {
     await Promise.all(unregisterPromises)
   }
 
-  public async unregisterApplicationCommands() {
+  public async unregisterApplicationCommands(): Promise<void> {
     const route = Routes.applicationCommands(this.#discord.applicationId)
     await this.#discord.rest.put(route, { body: [] })
     console.log("Unregistered application commands.")
   }
 
-  public _listen() {
+  public _listen(): void {
     // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: ignore
     const listen = async (interaction: Interaction) => {
       if (!interaction.isChatInputCommand()) return
@@ -145,6 +145,3 @@ class CommandManager {
     void handleInteractionReply()
   }
 }
-
-export { CommandManager }
-export type { Command, CommandHook }

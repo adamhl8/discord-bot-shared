@@ -18,7 +18,7 @@ interface SingleEvent<E extends ValidEvents = ValidEvents> {
   handler: EventHandlerMap[E]
 }
 
-class EventManager {
+export class EventManager {
   readonly #events: SingleEvent[] = []
   readonly #discord: DiscordContext
 
@@ -29,11 +29,11 @@ class EventManager {
   /*
    * Add an event listener
    */
-  public add<N extends ValidEvents>(event: SingleEvent<N>) {
+  public add<N extends ValidEvents>(event: SingleEvent<N>): void {
     this.#events.push(event)
   }
 
-  public _listen() {
+  public _listen(): void {
     for (const event of this.#events) {
       const listen = async (...args: ClientEvents[typeof event.event]) => {
         try {
@@ -51,9 +51,6 @@ class EventManager {
   }
 }
 
-type Event = {
+export type Event = {
   [E in ValidEvents]: SingleEvent<E>
 }[ValidEvents]
-
-export { EventManager }
-export type { Event }

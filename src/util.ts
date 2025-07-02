@@ -37,11 +37,11 @@ interface ChannelTypeToChannelMap {
  *
  * Getting a properly typed channel with discord.js can be a bit of a pain, so this is an alternative.
  */
-async function getChannel<T extends keyof ChannelTypeToChannelMap>(
+export async function getChannel<T extends keyof ChannelTypeToChannelMap>(
   guild: Guild,
   channelNameOrId: string,
   channelType: T,
-) {
+): Promise<ChannelTypeToChannelMap[T]> {
   const channels = await guild.channels.fetch()
 
   let channel: NonThreadGuildBasedChannel | undefined | null
@@ -62,7 +62,7 @@ async function getChannel<T extends keyof ChannelTypeToChannelMap>(
  * @param message The message to throw
  * @throws Error
  */
-function throwError(message: string): never {
+export function throwError(message: string): never {
   throw new Error(message)
 }
 
@@ -72,11 +72,11 @@ function throwError(message: string): never {
  * @param message The message to throw
  * @throws UserError
  */
-function throwUserError(message: string): never {
+export function throwUserError(message: string): never {
   throw new UserError(message)
 }
 
-class UserError extends Error {
+export class UserError extends Error {
   public constructor(message: string) {
     super(message)
     this.name = "UserError"
@@ -84,5 +84,3 @@ class UserError extends Error {
     Object.setPrototypeOf(this, new.target.prototype)
   }
 }
-
-export { UserError, getChannel, throwError, throwUserError }

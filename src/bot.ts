@@ -4,20 +4,20 @@ import { Client, Events, REST } from "discord.js"
 import { CommandManager } from "./command-manager.js"
 import { EventManager } from "./event-manager.js"
 
-interface BotOptions {
+export interface BotOptions {
   applicationId: string
   token: string
   clientOptions: ClientOptions
 }
 
-interface DiscordContext {
+export interface DiscordContext {
   applicationId: string
   token: string
   client: Client
   rest: REST
 }
 
-class Bot {
+export class Bot {
   readonly #discord: DiscordContext
 
   public readonly commands: CommandManager
@@ -35,7 +35,7 @@ class Bot {
     this.events = new EventManager(this.#discord)
   }
 
-  public async login() {
+  public async login(): Promise<void> {
     this.#discord.client.once(Events.ClientReady, () => {
       console.log("Client is ready.")
     })
@@ -45,6 +45,3 @@ class Bot {
     await this.#discord.client.login(this.#discord.token)
   }
 }
-
-export { Bot }
-export type { BotOptions, DiscordContext }
