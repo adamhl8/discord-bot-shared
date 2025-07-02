@@ -1,6 +1,6 @@
 import type { Client, ClientEvents } from "discord.js"
 
-import type { DiscordContext } from "./bot.js"
+import type { DiscordContext } from "./bot.ts"
 
 type ValidEvents = keyof ClientEvents
 

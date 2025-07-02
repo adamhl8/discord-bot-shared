@@ -1,8 +1,8 @@
 import type { ClientOptions } from "discord.js"
 import { Client, Events, REST } from "discord.js"
 
-import { CommandManager } from "./command-manager.js"
-import { EventManager } from "./event-manager.js"
+import { CommandManager } from "./command-manager.ts"
+import { EventManager } from "./event-manager.ts"
 
 export interface BotOptions {
   applicationId: string
