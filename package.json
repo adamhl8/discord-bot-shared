@@ -23,9 +23,7 @@
       "types": "./dist/types/index.d.ts"
     }
   },
-  "files": [
-    "dist/"
-  ],
+  "files": ["dist/"],
   "scripts": {
     "bundle": "rm -rf ./dist && bun lint && tsc && tsc-alias",
     "lint": "tsc --noEmit && biome check --write",
