@@ -36,7 +36,7 @@
 		"discord.js": "^14.0.0"
 	},
 	"devDependencies": {
-		"@adamhl8/configs": "^0.15.19",
+		"@adamhl8/configs": "^0.15.20",
 		"@arethetypeswrong/core": "^0.18.2",
 		"@biomejs/biome": "^2.2.4",
 		"@types/bun": "^1.2.22",
