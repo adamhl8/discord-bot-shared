@@ -4,6 +4,8 @@ A small package that makes creating [discord.js](https://github.com/discordjs/di
 
 ---
 
+<!-- toc -->
+
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Creating a `Bot` instance](#creating-a-bot-instance)
@@ -20,6 +22,8 @@ A small package that makes creating [discord.js](https://github.com/discordjs/di
   - [Events](#events-1)
 - [Utilities](#utilities)
   - [getChannel](#getchannel)
+
+<!-- tocstop -->
 
 ## Installation
 

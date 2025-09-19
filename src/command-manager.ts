@@ -80,7 +80,6 @@ export class CommandManager {
   }
 
   public _listen(): void {
-    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: ignore
     const listen = async (interaction: Interaction) => {
       if (!interaction.isChatInputCommand()) return
       if (!interaction.guildId) return
