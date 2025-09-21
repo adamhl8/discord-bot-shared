@@ -1,8 +1,8 @@
 import { Client, Events, REST } from "discord.js"
 
-import { CommandManager } from "~/command-manager.js"
-import { EventManager } from "~/event-manager.js"
-import type { BotOptions, DiscordContext } from "~/types.js"
+import { CommandManager } from "~/command-manager.ts"
+import { EventManager } from "~/event-manager.ts"
+import type { BotOptions, DiscordContext } from "~/types.ts"
 
 export class Bot {
   readonly #discord: DiscordContext
