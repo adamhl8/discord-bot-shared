@@ -7,8 +7,8 @@ import type {
 } from "discord.js"
 import { Collection, Events, MessageFlags, Routes } from "discord.js"
 
-import type { DiscordContext } from "~/types.js"
-import { throwUserError, UserError } from "~/util.js"
+import type { DiscordContext } from "~/types.ts"
+import { throwUserError, UserError } from "~/util.ts"
 
 export interface Command {
   requiredRoles?: string[]
