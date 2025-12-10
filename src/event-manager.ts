@@ -37,8 +37,6 @@ export class EventManager {
     for (const event of this.#events) {
       const listen = async (...args: ClientEvents[typeof event.event]) => {
         try {
-          // TS Error: Expression produces a union type that is too complex to represent.
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
           await (event.handler as EventHandler)(this.#discord.client, ...args)
         } catch (error) {
           console.error(error)

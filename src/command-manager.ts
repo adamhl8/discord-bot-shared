@@ -39,11 +39,47 @@ export class CommandManager {
   }
 
   public async register(): Promise<void> {
-    const payload = this.#commands.map((c) => c.command)
+    const commandPayload = this.#commands.map((c) => c.command)
     const route = Routes.applicationCommands(this.#discord.applicationId)
-    await this.#discord.rest.put(route, { body: payload })
+    await this.#discord.rest.put(route, { body: commandPayload })
 
-    console.log(`Registered ${this.#commands.size.toString()} (/) commands.`)
+    console.log(`Globally registered ${this.#commands.size.toString()} (/) commands.`)
+  }
+
+  public async unregister(): Promise<void> {
+    const route = Routes.applicationCommands(this.#discord.applicationId)
+    await this.#discord.rest.put(route, { body: [] })
+    console.log("Unregistered global commands.")
+  }
+
+  // We can't fetch guilds before the client is ready.
+  public async registerGuildCommands() {
+    if (this.#discord.client.readyAt) await this._registerGuildCommands()
+    else this.#discord.client.once(Events.ClientReady, () => void this._registerGuildCommands())
+  }
+
+  private async _registerGuildCommands(): Promise<void> {
+    let guilds: Collection<Snowflake, OAuth2Guild>
+    try {
+      guilds = await this.#discord.client.guilds.fetch()
+    } catch (error) {
+      console.error("Unable to register guild commands. Failed to fetch guilds.")
+      throw error
+    }
+
+    const commandPayload = this.#commands.map((c) => c.command)
+
+    const registerPromises: Promise<void>[] = []
+    for (const guild of guilds.values()) {
+      const route = Routes.applicationGuildCommands(this.#discord.applicationId, guild.id)
+      const registerCommandsInGuild = async () => {
+        await this.#discord.rest.put(route, { body: commandPayload })
+        console.log(`Registered ${this.#commands.size.toString()} (/) commands in guild: ${guild.name}`)
+      }
+      registerPromises.push(registerCommandsInGuild())
+    }
+
+    await Promise.all(registerPromises)
   }
 
   public async unregisterGuildCommands(): Promise<void> {
@@ -63,20 +99,14 @@ export class CommandManager {
     const unregisterPromises: Promise<void>[] = []
     for (const guild of guilds.values()) {
       const route = Routes.applicationGuildCommands(this.#discord.applicationId, guild.id)
-      const unregisterGuildCommands = async () => {
+      const unregister = async () => {
         await this.#discord.rest.put(route, { body: [] })
         console.log(`Unregistered commands from guild: ${guild.name}`)
       }
-      unregisterPromises.push(unregisterGuildCommands())
+      unregisterPromises.push(unregister())
     }
 
     await Promise.all(unregisterPromises)
-  }
-
-  public async unregisterApplicationCommands(): Promise<void> {
-    const route = Routes.applicationCommands(this.#discord.applicationId)
-    await this.#discord.rest.put(route, { body: [] })
-    console.log("Unregistered application commands.")
   }
 
   public _listen(): void {
