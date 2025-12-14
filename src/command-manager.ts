@@ -1,22 +1,32 @@
 import type {
   ChatInputCommandInteraction,
   Interaction,
-  OAuth2Guild,
-  RESTPostAPIChatInputApplicationCommandsJSONBody,
-  Snowflake,
+  SlashCommandBuilder,
+  SlashCommandOptionsOnlyBuilder,
 } from "discord.js"
 import { Collection, Events, MessageFlags, Routes } from "discord.js"
+import type { Result } from "ts-explicit-errors"
+import { attempt, CtxError, err, filterMap, isErr } from "ts-explicit-errors"
 
-import type { DiscordContext } from "~/types.ts"
-import { throwUserError, UserError } from "~/util.ts"
+import type { DiscordContext } from "~/bot.ts"
+import { components } from "~/components.ts"
+import { handleCallback } from "~/util.ts"
+
+export type CommandRunFn = (interaction: ChatInputCommandInteraction<"cached">) => void | Promise<void>
 
 export interface Command {
   requiredRoles?: string[]
-  command: RESTPostAPIChatInputApplicationCommandsJSONBody
-  run: (interaction: ChatInputCommandInteraction<"cached">) => void | Promise<void>
+  command: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder
+  run: CommandRunFn
 }
 
-export type CommandHook = (interaction: ChatInputCommandInteraction<"cached">) => boolean | Promise<boolean>
+interface CommandHookResult {
+  success: boolean
+  message?: string
+}
+export type CommandHook = (
+  interaction: ChatInputCommandInteraction<"cached">,
+) => CommandHookResult | Promise<CommandHookResult>
 
 export class CommandManager {
   readonly #commands = new Collection<string, Command>()
@@ -25,6 +35,15 @@ export class CommandManager {
 
   public constructor(discord: DiscordContext) {
     this.#discord = discord
+  }
+
+  private getCommandPayload() {
+    return this.#commands.map((c) => c.command.toJSON())
+  }
+
+  private async onReady(fn: () => Result | Promise<Result>) {
+    if (this.#discord.client.isReady()) await handleCallback(fn)
+    else this.#discord.client.once(Events.ClientReady, async () => await handleCallback(fn))
   }
 
   /*
@@ -39,138 +58,188 @@ export class CommandManager {
   }
 
   public async register(): Promise<void> {
-    const commandPayload = this.#commands.map((c) => c.command)
-    const route = Routes.applicationCommands(this.#discord.applicationId)
-    await this.#discord.rest.put(route, { body: commandPayload })
+    const registerResult = await attempt(async () => {
+      const route = Routes.applicationCommands(this.#discord.applicationId)
+      await this.#discord.rest.put(route, { body: this.getCommandPayload() })
 
-    console.log(`Globally registered ${this.#commands.size.toString()} (/) commands.`)
+      console.log(`Globally registered ${this.#commands.size.toString()} (/) commands.`)
+    })
+
+    if (isErr(registerResult)) console.error(`failed to register global commands: ${registerResult.messageChain}`)
   }
 
   public async unregister(): Promise<void> {
-    const route = Routes.applicationCommands(this.#discord.applicationId)
-    await this.#discord.rest.put(route, { body: [] })
-    console.log("Unregistered global commands.")
+    const unregisterResult = await attempt(async () => {
+      const route = Routes.applicationCommands(this.#discord.applicationId)
+      await this.#discord.rest.put(route, { body: [] })
+
+      console.log("Unregistered global commands.")
+    })
+
+    if (isErr(unregisterResult)) console.error(`failed to unregister global commands: ${unregisterResult.messageChain}`)
   }
 
-  // We can't fetch guilds before the client is ready.
-  public async registerGuildCommands() {
-    if (this.#discord.client.readyAt) await this._registerGuildCommands()
-    else this.#discord.client.once(Events.ClientReady, () => void this._registerGuildCommands())
+  public async guildRegister() {
+    const registerGuildCommands = async (): Promise<Result> => {
+      const guilds = await attempt(() => this.#discord.client.guilds.fetch())
+      if (isErr(guilds)) return err("failed to fetch guilds", guilds)
+
+      const commandPayload = this.getCommandPayload()
+
+      const { errors } = await filterMap(guilds.values(), async (guild) => {
+        const registerResult = await attempt(async () => {
+          const route = Routes.applicationGuildCommands(this.#discord.applicationId, guild.id)
+          await this.#discord.rest.put(route, { body: commandPayload })
+          console.log(`Registered ${this.#commands.size.toString()} (/) commands in guild '${guild.name}'`)
+        })
+
+        if (isErr(registerResult))
+          return err(`failed to register guild commands in guild '${guild.name}'`, registerResult)
+
+        return
+      })
+
+      if (errors)
+        return err(
+          `failed to register guild commands in all guilds:\n${errors.map((error) => error.message).join("\n")}`,
+          undefined,
+        )
+    }
+
+    await this.onReady(async (): Promise<Result> => {
+      const registerGuildCommandsResult = await registerGuildCommands()
+      if (isErr(registerGuildCommandsResult))
+        return err("failed to register guild commands", registerGuildCommandsResult)
+    })
   }
 
-  private async _registerGuildCommands(): Promise<void> {
-    let guilds: Collection<Snowflake, OAuth2Guild>
-    try {
-      guilds = await this.#discord.client.guilds.fetch()
-    } catch (error) {
-      console.error("Unable to register guild commands. Failed to fetch guilds.")
-      throw error
+  public async guildUnregister(): Promise<void> {
+    const unregisterGuildCommands = async (): Promise<Result> => {
+      const guilds = await attempt(() => this.#discord.client.guilds.fetch())
+      if (isErr(guilds)) return err("failed to fetch guilds", guilds)
+
+      const { errors } = await filterMap(guilds.values(), async (guild) => {
+        const registerResult = await attempt(async () => {
+          const route = Routes.applicationGuildCommands(this.#discord.applicationId, guild.id)
+          await this.#discord.rest.put(route, { body: [] })
+          console.log(`Unregistered commands in guild '${guild.name}'`)
+        })
+
+        if (isErr(registerResult))
+          return err(`failed to unregister guild commands in guild '${guild.name}'`, registerResult)
+
+        return
+      })
+
+      if (errors)
+        return err(
+          `failed to unregister guild commands in all guilds:\n${errors.map((error) => error.message).join("\n")}`,
+          undefined,
+        )
     }
 
-    const commandPayload = this.#commands.map((c) => c.command)
-
-    const registerPromises: Promise<void>[] = []
-    for (const guild of guilds.values()) {
-      const route = Routes.applicationGuildCommands(this.#discord.applicationId, guild.id)
-      const registerCommandsInGuild = async () => {
-        await this.#discord.rest.put(route, { body: commandPayload })
-        console.log(`Registered ${this.#commands.size.toString()} (/) commands in guild: ${guild.name}`)
-      }
-      registerPromises.push(registerCommandsInGuild())
-    }
-
-    await Promise.all(registerPromises)
-  }
-
-  public async unregisterGuildCommands(): Promise<void> {
-    if (this.#discord.client.readyAt) await this._unregisterGuildCommands()
-    else this.#discord.client.once(Events.ClientReady, () => void this._unregisterGuildCommands())
-  }
-
-  private async _unregisterGuildCommands(): Promise<void> {
-    let guilds: Collection<Snowflake, OAuth2Guild>
-    try {
-      guilds = await this.#discord.client.guilds.fetch()
-    } catch (error) {
-      console.error("Unable to unregister guild commands. Failed to fetch guilds.")
-      throw error
-    }
-
-    const unregisterPromises: Promise<void>[] = []
-    for (const guild of guilds.values()) {
-      const route = Routes.applicationGuildCommands(this.#discord.applicationId, guild.id)
-      const unregister = async () => {
-        await this.#discord.rest.put(route, { body: [] })
-        console.log(`Unregistered commands from guild: ${guild.name}`)
-      }
-      unregisterPromises.push(unregister())
-    }
-
-    await Promise.all(unregisterPromises)
+    await this.onReady(async (): Promise<Result> => {
+      const unregisterGuildCommandsResult = await unregisterGuildCommands()
+      if (isErr(unregisterGuildCommandsResult))
+        return err("failed to unregister guild commands", unregisterGuildCommandsResult)
+    })
   }
 
   public _listen(): void {
-    const listen = async (interaction: Interaction) => {
+    const handleInteraction = async (interaction: Interaction): Promise<Result> => {
       if (!interaction.isChatInputCommand()) return
       if (!interaction.guildId) return
-      if (!interaction.inCachedGuild()) await interaction.client.guilds.fetch(interaction.guildId).catch(console.error)
-      if (!interaction.inCachedGuild()) {
-        CommandManager.interactionReply(interaction, "Guild is not cached. Try again.")
-        return
-      }
+
+      const guild = await interaction.client.guilds.fetch(interaction.guildId)
+      if (isErr(guild))
+        return await CommandManager.interactionErrorReply(
+          interaction,
+          err(`failed to fetch guild with id '${interaction.guildId}'`, guild),
+        )
+
+      if (!interaction.inCachedGuild())
+        return await CommandManager.interactionErrorReply(interaction, "Guild is not cached. Try again.")
 
       const command = this.#commands.get(interaction.commandName)
-      if (!command) {
-        CommandManager.interactionReply(interaction, `Failed to get command with name: ${interaction.commandName}`)
-        return
-      }
+      if (!command)
+        return await CommandManager.interactionErrorReply(
+          interaction,
+          err(`failed to get command with name '${interaction.commandName}'`, undefined),
+        )
 
-      if (!(await CommandManager.checkRoles(command, interaction))) {
-        CommandManager.interactionReply(interaction, "You do not have one of the required roles to run this command.")
-        return
-      }
+      const hasRequiredRole = await CommandManager.checkRoles(command, interaction)
+      if (isErr(hasRequiredRole))
+        return await CommandManager.interactionErrorReply(interaction, err("failed to check roles", hasRequiredRole))
 
-      try {
-        const shouldContinue = this.#globalCommandHook ? await this.#globalCommandHook(interaction) : true
-        if (!shouldContinue) throwUserError("The global command hook returned false.")
+      if (!hasRequiredRole)
+        return await CommandManager.interactionErrorReply(
+          interaction,
+          "You do not have one of the required roles to run this command.",
+          "warn",
+        )
 
-        await command.run(interaction)
-      } catch (error) {
-        CommandManager.interactionReply(interaction, error)
-      }
+      const globalCommandHookResult = await attempt(() =>
+        this.#globalCommandHook ? this.#globalCommandHook(interaction) : { success: true },
+      )
+      if (isErr(globalCommandHookResult))
+        return await CommandManager.interactionErrorReply(
+          interaction,
+          err("failed to run global command hook", globalCommandHookResult),
+        )
+
+      const {
+        success: shouldContinue,
+        message: globalCommandHookMessage = "The global command hook did not succeed.",
+      } = globalCommandHookResult
+      if (!shouldContinue)
+        return await CommandManager.interactionErrorReply(interaction, globalCommandHookMessage, "warn")
+
+      const commandRunResult = await attempt(() => command.run(interaction))
+      if (isErr(commandRunResult))
+        return await CommandManager.interactionErrorReply(
+          interaction,
+          err(`failed to run command \`${command.command.name}\``, commandRunResult),
+        )
     }
 
-    this.#discord.client.on(Events.InteractionCreate, (interaction) => void listen(interaction))
+    this.#discord.client.on(
+      Events.InteractionCreate,
+      async (interaction) => await handleCallback(() => handleInteraction(interaction)),
+    )
+
     console.log("Listening for commands.")
   }
 
-  private static async checkRoles(command: Command, interaction: ChatInputCommandInteraction<"cached">) {
-    if (!command.requiredRoles) return true
+  private static async checkRoles({ requiredRoles }: Command, interaction: ChatInputCommandInteraction<"cached">) {
+    if (!requiredRoles) return true
 
-    if (command.requiredRoles.length > 0) {
-      const member = await interaction.guild.members.fetch(interaction.user).catch(console.error)
-      if (!member) return false
+    if (requiredRoles.length > 0) {
+      const member = await attempt(() => interaction.guild.members.fetch(interaction.user))
+      if (isErr(member)) return err(`failed to fetch member '${interaction.user.id}'`, member)
 
-      return member.roles.cache.some((role) =>
-        command.requiredRoles ? command.requiredRoles.includes(role.name) : false,
-      )
+      return member.roles.cache.some((role) => requiredRoles.includes(role.name))
     }
 
     return false
   }
 
-  private static interactionReply(interaction: ChatInputCommandInteraction, error: unknown) {
-    let errorMessage: string
-    if (error instanceof UserError) errorMessage = error.message
-    else if (error instanceof Error && error.stack) errorMessage = error.stack
-    else errorMessage = String(error)
+  private static async interactionErrorReply(
+    interaction: ChatInputCommandInteraction,
+    error: string | CtxError,
+    type: keyof typeof components = "error",
+  ): Promise<Result> {
+    const errorMessage = error instanceof CtxError ? error.messageChain : error
+    const errorComponent = components[type](errorMessage)
 
-    const message = `There was an error while running this command.\n\`\`\`${errorMessage}\`\`\``
-    const handleInteractionReply = async () => {
-      await (interaction.deferred
-        ? interaction.editReply(message).catch(console.error)
-        : interaction.reply({ content: message, flags: MessageFlags.Ephemeral }).catch(console.error))
-    }
-    void handleInteractionReply()
+    const reply = await attempt(async () =>
+      interaction.deferred
+        ? interaction.editReply(errorComponent)
+        : interaction.reply({
+            components: errorComponent.components,
+            flags: [...errorComponent.flags, MessageFlags.Ephemeral],
+          }),
+    )
+
+    if (isErr(reply)) return err(`failed to reply to interaction from command '${interaction.commandName}'`, reply)
   }
 }

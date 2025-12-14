@@ -1,6 +1,9 @@
 import type { Client, ClientEvents } from "discord.js"
+import type { Result } from "ts-explicit-errors"
+import { attempt, err, isErr } from "ts-explicit-errors"
 
-import type { DiscordContext } from "~/types.ts"
+import type { DiscordContext } from "~/bot.ts"
+import { handleCallback } from "~/util.ts"
 
 type ValidEvents = keyof ClientEvents
 
@@ -34,17 +37,17 @@ export class EventManager {
   }
 
   public _listen(): void {
-    for (const event of this.#events) {
-      const listen = async (...args: ClientEvents[typeof event.event]) => {
-        try {
-          await (event.handler as EventHandler)(this.#discord.client, ...args)
-        } catch (error) {
-          console.error(error)
-        }
+    this.#events.forEach((singleEvent) => {
+      const handleEvent = async (...args: ClientEvents[typeof singleEvent.event]): Promise<Result> => {
+        const eventHandlerResult = await attempt(() =>
+          (singleEvent.handler as EventHandler)(this.#discord.client, ...args),
+        )
+        if (isErr(eventHandlerResult)) return err(`failed to handle event '${singleEvent.event}'`, eventHandlerResult)
       }
 
-      this.#discord.client.on(event.event, (...args) => void listen(...args))
-    }
+      this.#discord.client.on(singleEvent.event, async (...args) => await handleCallback(() => handleEvent(...args)))
+    })
+
     console.log(`Listening for (${this.#events.length.toString()}) events.`)
   }
 }
