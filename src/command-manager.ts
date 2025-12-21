@@ -20,10 +20,15 @@ export interface Command {
   run: CommandRunFn
 }
 
-interface CommandHookResult {
-  success: boolean
-  message?: string
-}
+type CommandHookResult =
+  | {
+      success: true
+    }
+  | {
+      success: false
+      message?: string
+    }
+
 export type CommandHook = (
   interaction: ChatInputCommandInteraction<"cached">,
 ) => CommandHookResult | Promise<CommandHookResult>
@@ -179,7 +184,7 @@ export class CommandManager {
         )
 
       const globalCommandHookResult = await attempt(() =>
-        this.#globalCommandHook ? this.#globalCommandHook(interaction) : { success: true },
+        this.#globalCommandHook ? this.#globalCommandHook(interaction) : ({ success: true } as const),
       )
       if (isErr(globalCommandHookResult))
         return await CommandManager.interactionErrorReply(
@@ -187,12 +192,12 @@ export class CommandManager {
           err("failed to run global command hook", globalCommandHookResult),
         )
 
-      const {
-        success: shouldContinue,
-        message: globalCommandHookMessage = "The global command hook did not succeed.",
-      } = globalCommandHookResult
-      if (!shouldContinue)
-        return await CommandManager.interactionErrorReply(interaction, globalCommandHookMessage, "warn")
+      if (!globalCommandHookResult.success)
+        return await CommandManager.interactionErrorReply(
+          interaction,
+          globalCommandHookResult.message ?? "The global command hook did not succeed.",
+          "warn",
+        )
 
       const commandRunResult = await attempt(() => command.run(interaction))
       if (isErr(commandRunResult))
