@@ -8,9 +8,9 @@ import { Collection, Events, MessageFlags, Routes } from "discord.js"
 import type { Result } from "ts-explicit-errors"
 import { attempt, CtxError, err, filterMap, isErr } from "ts-explicit-errors"
 
-import type { DiscordContext } from "~/bot.ts"
-import { components } from "~/components.ts"
-import { handleCallback } from "~/util.ts"
+import type { DiscordContext } from "#/bot.ts"
+import { components } from "#/components.ts"
+import { handleCallback } from "#/util.ts"
 
 export type CommandRunFn = (interaction: ChatInputCommandInteraction<"cached">) => void | Promise<void>
 
@@ -48,7 +48,7 @@ export class CommandManager {
 
   private async onReady(fn: () => Result | Promise<Result>) {
     if (this.#discord.client.isReady()) await handleCallback(fn)
-    else this.#discord.client.once(Events.ClientReady, async () => await handleCallback(fn))
+    else this.#discord.client.once(Events.ClientReady, () => void handleCallback(fn))
   }
 
   /*
@@ -86,7 +86,7 @@ export class CommandManager {
 
   public async guildRegister() {
     const registerGuildCommands = async (): Promise<Result> => {
-      const guilds = await attempt(() => this.#discord.client.guilds.fetch())
+      const guilds = await attempt(async () => this.#discord.client.guilds.fetch())
       if (isErr(guilds)) return err("failed to fetch guilds", guilds)
 
       const commandPayload = this.getCommandPayload()
@@ -104,11 +104,12 @@ export class CommandManager {
         return
       })
 
-      if (errors)
+      if (errors) {
         return err(
           `failed to register guild commands in all guilds:\n${errors.map((error) => error.message).join("\n")}`,
           undefined,
         )
+      }
     }
 
     await this.onReady(async (): Promise<Result> => {
@@ -120,7 +121,7 @@ export class CommandManager {
 
   public async guildUnregister(): Promise<void> {
     const unregisterGuildCommands = async (): Promise<Result> => {
-      const guilds = await attempt(() => this.#discord.client.guilds.fetch())
+      const guilds = await attempt(async () => this.#discord.client.guilds.fetch())
       if (isErr(guilds)) return err("failed to fetch guilds", guilds)
 
       const { errors } = await filterMap(guilds.values(), async (guild) => {
@@ -136,11 +137,12 @@ export class CommandManager {
         return
       })
 
-      if (errors)
+      if (errors) {
         return err(
           `failed to unregister guild commands in all guilds:\n${errors.map((error) => error.message).join("\n")}`,
           undefined,
         )
+      }
     }
 
     await this.onReady(async (): Promise<Result> => {
@@ -156,60 +158,66 @@ export class CommandManager {
       if (!interaction.guildId) return
 
       const guild = await interaction.client.guilds.fetch(interaction.guildId)
-      if (isErr(guild))
-        return await CommandManager.interactionErrorReply(
+      if (isErr(guild)) {
+        return CommandManager.interactionErrorReply(
           interaction,
           err(`failed to fetch guild with id '${interaction.guildId}'`, guild),
         )
+      }
 
       if (!interaction.inCachedGuild())
-        return await CommandManager.interactionErrorReply(interaction, "Guild is not cached. Try again.")
+        return CommandManager.interactionErrorReply(interaction, "Guild is not cached. Try again.")
 
       const command = this.#commands.get(interaction.commandName)
-      if (!command)
-        return await CommandManager.interactionErrorReply(
+      if (!command) {
+        return CommandManager.interactionErrorReply(
           interaction,
           err(`failed to get command with name '${interaction.commandName}'`, undefined),
         )
+      }
 
       const hasRequiredRole = await CommandManager.checkRoles(command, interaction)
       if (isErr(hasRequiredRole))
-        return await CommandManager.interactionErrorReply(interaction, err("failed to check roles", hasRequiredRole))
+        return CommandManager.interactionErrorReply(interaction, err("failed to check roles", hasRequiredRole))
 
-      if (!hasRequiredRole)
-        return await CommandManager.interactionErrorReply(
+      if (!hasRequiredRole) {
+        return CommandManager.interactionErrorReply(
           interaction,
           "You do not have one of the required roles to run this command.",
           "warn",
         )
+      }
 
-      const globalCommandHookResult = await attempt(() =>
+      const globalCommandHookResult = await attempt(async () =>
         this.#globalCommandHook ? this.#globalCommandHook(interaction) : ({ success: true } as const),
       )
-      if (isErr(globalCommandHookResult))
-        return await CommandManager.interactionErrorReply(
+      if (isErr(globalCommandHookResult)) {
+        return CommandManager.interactionErrorReply(
           interaction,
           err("failed to run global command hook", globalCommandHookResult),
         )
+      }
 
-      if (!globalCommandHookResult.success)
-        return await CommandManager.interactionErrorReply(
+      if (!globalCommandHookResult.success) {
+        return CommandManager.interactionErrorReply(
           interaction,
           globalCommandHookResult.message ?? "The global command hook did not succeed.",
           "warn",
         )
+      }
 
-      const commandRunResult = await attempt(() => command.run(interaction))
-      if (isErr(commandRunResult))
-        return await CommandManager.interactionErrorReply(
+      const commandRunResult = await attempt(async () => command.run(interaction))
+      if (isErr(commandRunResult)) {
+        return CommandManager.interactionErrorReply(
           interaction,
           err(`failed to run command \`${command.command.name}\``, commandRunResult),
         )
+      }
     }
 
     this.#discord.client.on(
       Events.InteractionCreate,
-      async (interaction) => await handleCallback(() => handleInteraction(interaction)),
+      (interaction) => void handleCallback(async () => handleInteraction(interaction)),
     )
 
     console.log("Listening for commands.")
@@ -219,7 +227,7 @@ export class CommandManager {
     if (!requiredRoles) return true
 
     if (requiredRoles.length > 0) {
-      const member = await attempt(() => interaction.guild.members.fetch(interaction.user))
+      const member = await attempt(async () => interaction.guild.members.fetch(interaction.user))
       if (isErr(member)) return err(`failed to fetch member '${interaction.user.id}'`, member)
 
       return member.roles.cache.some((role) => requiredRoles.includes(role.name))

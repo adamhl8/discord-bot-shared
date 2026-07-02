@@ -4,7 +4,7 @@ const error = (message: string) =>
   ({
     components: [
       new ContainerBuilder()
-        .setAccentColor(0xff_00_00)
+        .setAccentColor(0xFF_00_00)
         .addTextDisplayComponents((t) => t.setContent("**Error**"))
         .addSeparatorComponents((s) => s.setSpacing(SeparatorSpacingSize.Small))
         .addTextDisplayComponents((t) => t.setContent(message)),
@@ -16,7 +16,7 @@ const warn = (message: string) =>
   ({
     components: [
       new ContainerBuilder()
-        .setAccentColor(0xff_bf_00)
+        .setAccentColor(0xFF_BF_00)
         .addTextDisplayComponents((t) => t.setContent("**Warning**"))
         .addSeparatorComponents((s) => s.setSpacing(SeparatorSpacingSize.Small))
         .addTextDisplayComponents((t) => t.setContent(message)),

@@ -1,9 +1,10 @@
+// oxlint-disable no-underscore-dangle
 import type { ClientOptions } from "discord.js"
 import { Client, Events, REST } from "discord.js"
 import { attempt, isErr } from "ts-explicit-errors"
 
-import { CommandManager } from "~/command-manager.ts"
-import { EventManager } from "~/event-manager.ts"
+import { CommandManager } from "#/command-manager.ts"
+import { EventManager } from "#/event-manager.ts"
 
 interface BotOptions {
   applicationId: string
@@ -44,7 +45,7 @@ export class Bot {
     this.commands._listen()
     this.events._listen()
 
-    const loginResult = await attempt(() => this.#discord.client.login(this.#discord.token))
+    const loginResult = await attempt(async () => this.#discord.client.login(this.#discord.token))
     if (isErr(loginResult)) console.error(`failed to login: ${loginResult.messageChain}`)
   }
 }
