@@ -1,3 +1,9 @@
+## [0.18.0](https://github.com/adamhl8/discord-bot-shared/compare/v0.17.0..v0.18.0) - 2026-07-04
+
+### 🚀 Features
+
+- allow events to be registered with the "once" handler by @adamhl8 ([f35c871](https://github.com/adamhl8/discord-bot-shared/commit/f35c8716b8e1730cd2b0bc277a435f6086a4086a))
+
 ## [0.17.0](https://github.com/adamhl8/discord-bot-shared/compare/v0.16.2..v0.17.0) - 2026-07-04
 
 ### 🚀 Features
