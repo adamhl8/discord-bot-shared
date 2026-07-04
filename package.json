@@ -1,6 +1,6 @@
 {
   "name": "discord-bot-shared",
-  "version": "0.16.2",
+  "version": "0.17.0",
   "description": "Modules for creating discord bots.",
   "homepage": "https://github.com/adamhl8/discord-bot-shared",
   "bugs": {
