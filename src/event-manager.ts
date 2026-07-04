@@ -18,6 +18,7 @@ type EventHandlerMap = {
 
 interface SingleEvent<E extends ValidEvents = ValidEvents> {
   event: E
+  once?: boolean
   handler: EventHandlerMap[E]
 }
 
@@ -49,7 +50,11 @@ export class EventManager {
       if (isErr(eventHandlerResult)) return err(`failed to handle event '${singleEvent.event}'`, eventHandlerResult)
     }
 
-    this.#discord.client.on(singleEvent.event, (...args) => void handleCallback(async () => handleEvent(...args)))
+    const listenerType = singleEvent.once ? "once" : "on"
+    this.#discord.client[listenerType](
+      singleEvent.event,
+      (...args) => void handleCallback(async () => handleEvent(...args)),
+    )
   }
 }
 
