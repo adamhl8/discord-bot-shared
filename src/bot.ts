@@ -48,4 +48,8 @@ export class Bot {
     const loginResult = await attempt(async () => this.#discord.client.login(this.#discord.token))
     if (isErr(loginResult)) console.error(`failed to login: ${loginResult.messageChain}`)
   }
+
+  public async logout(): Promise<void> {
+    await this.#discord.client.destroy()
+  }
 }

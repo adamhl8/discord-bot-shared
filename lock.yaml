@@ -12,8 +12,8 @@ importers:
         version: 4.1.2
     devDependencies:
       "@adamhl8/configs":
-        specifier: ^0.24.13
-        version: 0.24.13(@arethetypeswrong/core@0.18.4)(@commitlint/cli@21.2.0)(@commitlint/config-conventional@21.2.0)(@types/node@26.1.0)(eslint@10.6.0)(knip@6.24.0)(oxfmt@0.57.0)(oxlint@1.72.0(oxlint-tsgolint@0.24.0))(oxlint-tsgolint@0.24.0)(publint@0.3.21)(release-it@20.2.1)(tsdown@0.22.3(@arethetypeswrong/core@0.18.4)(publint@0.3.21)(typescript@6.0.3))(typescript@6.0.3)
+        specifier: ^0.25.0
+        version: 0.25.0(@arethetypeswrong/core@0.18.4)(@commitlint/cli@21.2.0)(@commitlint/config-conventional@21.2.0)(@types/node@26.1.0)(eslint@10.6.0)(knip@6.24.0)(oxfmt@0.57.0)(oxlint@1.72.0(oxlint-tsgolint@0.24.0))(oxlint-tsgolint@0.24.0)(publint@0.3.21)(release-it@20.2.1)(tsdown@0.22.3(@arethetypeswrong/core@0.18.4)(publint@0.3.21)(typescript@6.0.3))(typescript@6.0.3)
       "@arethetypeswrong/core":
         specifier: ^0.18.4
         version: 0.18.4
@@ -58,9 +58,9 @@ importers:
         version: 6.0.3
 
 packages:
-  "@adamhl8/configs@0.24.13":
+  "@adamhl8/configs@0.25.0":
     resolution:
-      { integrity: sha512-ZqM8verXlqG2ywLT4eCVAl3XlKC7EDMIW/YtukU4dJfg0qwne2QVEnXXRDRrMH/571J834Ug7NyOvRB9nUavWg== }
+      { integrity: sha512-P4Ep4Z1YctIQ5ZWy0HRUSPKaqMRw4UFonK2QXa7FPqIdxXtNKmCDePr+umTDwMXZyfO5/L0DbbJ+pVT1Wo/3gw== }
     hasBin: true
     peerDependencies:
       "@arethetypeswrong/core": ">=0.18"
@@ -111,6 +111,14 @@ packages:
     resolution:
       { integrity: sha512-M5F0ePyN6h2Z6XxRiyIPqjGbltotXLjR0CKA0uKspsDu0QmgTNYvRb4RSQPMUs2ZXZHCCYpbaZbFbYOXLxCjUA== }
     engines: { node: ">=20" }
+
+  "@ark/schema@0.56.1":
+    resolution:
+      { integrity: sha512-1Cf2g9nKD8K/3JGRu+gCCfYw5d4qR8YLLjDs5W5kpmaButCYWAPFUJqSXyBATPjglzCd4tIkp398iPYVs8MjRA== }
+
+  "@ark/util@0.56.1":
+    resolution:
+      { integrity: sha512-Tp1rTik3q5Z+jAeeDxr5JZpmVIw0miti1ykSEHyZv5Pw3TIJl2xbN6KTacOxITp0l3s9ytlrWd30Zvqcy5vzoQ== }
 
   "@babel/code-frame@7.29.7":
     resolution:
@@ -1513,6 +1521,23 @@ packages:
     resolution:
       { integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q== }
 
+  arkenv@0.12.2:
+    resolution:
+      { integrity: sha512-PdR+gPNc/YQKTD75qDjREhmJc9nBaY/+zR5JLYQY3uB2zIiN+kwAv+A+kpV9a4A+9ivvYJvZURNcLaoFa9FMhg== }
+    peerDependencies:
+      arktype: ^2.1.22
+    peerDependenciesMeta:
+      arktype:
+        optional: true
+
+  arkregex@0.0.7:
+    resolution:
+      { integrity: sha512-O/Ltrn9EUSn3ui0KVzfyrWGDUsHlzKxDVBtpQxL/6JmLRMAZAebfSNf/A/J5Ny5S6QIwrXX+RfXsu888HMs35A== }
+
+  arktype@2.2.2:
+    resolution:
+      { integrity: sha512-YYf1xhL2dh5aPZFlsY0RAsxv5HZqfLGLptH2ZP3JidTmsGRW8VOymhPjjMTkerL12vR2YtX0SK4c1mATtae8SA== }
+
   ast-kit@3.0.0:
     resolution:
       { integrity: sha512-8OG92q3R35qjC/4i6BLBMg8IB+fClWu/1PEwg2Z9Rn+BuNaiEgJzpzn+pxWOdHJWDCAwu2JP0wCDTozAM4QirQ== }
@@ -2614,9 +2639,9 @@ packages:
     resolution:
       { integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA== }
 
-  picomatch@4.0.4:
+  picomatch@4.0.5:
     resolution:
-      { integrity: sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A== }
+      { integrity: sha512-RvwwcruNjI1ncT5xRakeyS9Lf8lcItv34KD+aif+VH9kduAyfYBipGh12274xtenIPZ119/R9BdTBa8gAwSh0A== }
     engines: { node: ">=12" }
 
   pkg-types@2.3.1:
@@ -3144,13 +3169,15 @@ packages:
       { integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ== }
 
 snapshots:
-  "@adamhl8/configs@0.24.13(@arethetypeswrong/core@0.18.4)(@commitlint/cli@21.2.0)(@commitlint/config-conventional@21.2.0)(@types/node@26.1.0)(eslint@10.6.0)(knip@6.24.0)(oxfmt@0.57.0)(oxlint@1.72.0(oxlint-tsgolint@0.24.0))(oxlint-tsgolint@0.24.0)(publint@0.3.21)(release-it@20.2.1)(tsdown@0.22.3(@arethetypeswrong/core@0.18.4)(publint@0.3.21)(typescript@6.0.3))(typescript@6.0.3)":
+  "@adamhl8/configs@0.25.0(@arethetypeswrong/core@0.18.4)(@commitlint/cli@21.2.0)(@commitlint/config-conventional@21.2.0)(@types/node@26.1.0)(eslint@10.6.0)(knip@6.24.0)(oxfmt@0.57.0)(oxlint@1.72.0(oxlint-tsgolint@0.24.0))(oxlint-tsgolint@0.24.0)(publint@0.3.21)(release-it@20.2.1)(tsdown@0.22.3(@arethetypeswrong/core@0.18.4)(publint@0.3.21)(typescript@6.0.3))(typescript@6.0.3)":
     dependencies:
       "@adamhl8/eslint-plugin-clean-modules": 0.1.3(eslint@10.6.0)(typescript@6.0.3)
       "@arethetypeswrong/core": 0.18.4
       "@commitlint/cli": 21.2.0(@types/node@26.1.0)(typescript@6.0.3)
       "@commitlint/config-conventional": 21.2.0
       "@commitlint/types": 21.2.0
+      arkenv: 0.12.2(arktype@2.2.2)
+      arktype: 2.2.2
       es-toolkit: 1.49.0
       knip: 6.24.0
       oxfmt: 0.57.0
@@ -3158,6 +3185,7 @@ snapshots:
       oxlint-tsgolint: 0.24.0
       publint: 0.3.21
       release-it: 20.2.1(@types/node@26.1.0)
+      ts-explicit-errors: 4.1.2
       tsdown: 0.22.3(@arethetypeswrong/core@0.18.4)(publint@0.3.21)(typescript@6.0.3)
       type-fest: 5.7.0
       typescript: 6.0.3
@@ -3183,6 +3211,12 @@ snapshots:
       semver: 7.8.5
       typescript: 5.6.1-rc
       validate-npm-package-name: 5.0.1
+
+  "@ark/schema@0.56.1":
+    dependencies:
+      "@ark/util": 0.56.1
+
+  "@ark/util@0.56.1": {}
 
   "@babel/code-frame@7.29.7":
     dependencies:
@@ -4110,6 +4144,20 @@ snapshots:
 
   argparse@2.0.1: {}
 
+  arkenv@0.12.2(arktype@2.2.2):
+    dependencies:
+      arktype: 2.2.2
+
+  arkregex@0.0.7:
+    dependencies:
+      "@ark/util": 0.56.1
+
+  arktype@2.2.2:
+    dependencies:
+      "@ark/schema": 0.56.1
+      "@ark/util": 0.56.1
+      arkregex: 0.0.7
+
   ast-kit@3.0.0:
     dependencies:
       "@babel/parser": 8.0.0
@@ -4435,9 +4483,9 @@ snapshots:
     dependencies:
       walk-up-path: 4.0.0
 
-  fdir@6.5.0(picomatch@4.0.4):
+  fdir@6.5.0(picomatch@4.0.5):
     dependencies:
-      picomatch: 4.0.4
+      picomatch: 4.0.5
 
   fflate@0.8.3: {}
 
@@ -4683,13 +4731,13 @@ snapshots:
 
   knip@6.24.0:
     dependencies:
-      fdir: 6.5.0(picomatch@4.0.4)
+      fdir: 6.5.0(picomatch@4.0.5)
       formatly: 0.3.0
       get-tsconfig: 4.14.0
       jiti: 2.7.0
       oxc-parser: 0.137.0
       oxc-resolver: 11.21.3
-      picomatch: 4.0.4
+      picomatch: 4.0.5
       smol-toml: 1.7.0
       strip-json-comments: 5.0.3
       tinyglobby: 0.2.17
@@ -5032,7 +5080,7 @@ snapshots:
 
   picocolors@1.1.1: {}
 
-  picomatch@4.0.4: {}
+  picomatch@4.0.5: {}
 
   pkg-types@2.3.1:
     dependencies:
@@ -5273,13 +5321,13 @@ snapshots:
 
   tinyglobby@0.2.15:
     dependencies:
-      fdir: 6.5.0(picomatch@4.0.4)
-      picomatch: 4.0.4
+      fdir: 6.5.0(picomatch@4.0.5)
+      picomatch: 4.0.5
 
   tinyglobby@0.2.17:
     dependencies:
-      fdir: 6.5.0(picomatch@4.0.4)
-      picomatch: 4.0.4
+      fdir: 6.5.0(picomatch@4.0.5)
+      picomatch: 4.0.5
 
   tinypool@2.1.0: {}
 
@@ -5309,7 +5357,7 @@ snapshots:
       hookable: 6.1.1
       import-without-cache: 0.4.0
       obug: 2.1.3
-      picomatch: 4.0.4
+      picomatch: 4.0.5
       publint: 0.3.21
       rolldown: 1.1.4
       rolldown-plugin-dts: 0.26.0(rolldown@1.1.4)(typescript@6.0.3)
