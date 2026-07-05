@@ -16,19 +16,21 @@ A small package that makes creating [discord.js](https://github.com/discordjs/di
   - [Global Command Hook](#global-command-hook)
 - [Events](#events)
   - [Listening for events](#listening-for-events)
-  - [Adding and registering events](#adding-and-registering-events)
+  - [Adding events](#adding-events)
 - [Error Handling](#error-handling)
   - [Commands](#commands-1)
   - [Events](#events-1)
 - [Utilities](#utilities)
-  - [getChannel](#getchannel)
+  - [components](#components)
 
 <!-- tocstop -->
 
 ## Installation
 
+Requires discord.js v15.
+
 ```sh
-npm install discord-bot-shared
+npm install discord-bot-shared discord.js
 ```
 
 ## Quick Start
@@ -39,10 +41,10 @@ In **`ping.ts`:**
 
 ```ts
 import { Command } from "discord-bot-shared"
-import { SlashCommandBuilder } from "discord.js"
+import { ChatInputCommandBuilder } from "discord.js"
 
 const ping: Command = {
-  command: new SlashCommandBuilder().setName("ping").setDescription("I'll respond with pong!").toJSON(),
+  command: new ChatInputCommandBuilder().setName("ping").setDescription("I'll respond with pong!"),
   async run(interaction) {
     await interaction.reply("Pong!")
   },
@@ -54,7 +56,7 @@ export default ping
 In **`index.ts`:**
 
 ```ts
-import Bot from "discord-bot-shared"
+import { Bot } from "discord-bot-shared"
 import { ClientOptions, GatewayIntentBits } from "discord.js"
 
 import ping from "./ping"
@@ -91,6 +93,12 @@ Once you have your bot setup and are ready for it to start listening for the com
 await bot.login()
 ```
 
+To log the bot out and destroy the underlying client:
+
+```ts
+await bot.logout()
+```
+
 ## Commands
 
 ### Creating a slash command
@@ -99,10 +107,10 @@ Commands can be created by constructing `Command` objects that will be added to 
 
 ```ts
 import { Command } from "discord-bot-shared"
-import { SlashCommandBuilder } from "discord.js"
+import { ChatInputCommandBuilder } from "discord.js"
 
 const ping: Command = {
-  command: new SlashCommandBuilder().setName("ping").setDescription("I'll respond with pong!").toJSON(),
+  command: new ChatInputCommandBuilder().setName("ping").setDescription("I'll respond with pong!"),
   async run(interaction) {
     await interaction.reply("Pong!")
   },
@@ -110,8 +118,6 @@ const ping: Command = {
 
 export default ping
 ```
-
-Make sure to call `.toJSON()` on `SlashCommandBuilder`.
 
 You can optionally provide a `requiredRoles` string array. If the member initiating the command has _any_ of the roles provided in this array, they will be allowed to run the command.
 
@@ -139,42 +145,47 @@ await bot.commands.register()
 
 This registers commands globally (for all servers). It's not really recommended to register commands every time your bot starts up as you may get rate-limited by Discord.
 
+Alternatively, you can register commands per-guild in every guild the bot is in. This waits until the client is ready, so it's safe to call before `login()`:
+
+```ts
+await bot.commands.guildRegister()
+```
+
 ### Unregistering commands
 
 ```ts
-await bot.commands.unregisterApplicationCommands()
+await bot.commands.unregister()
 ```
 
-This will unregister all commands globally.
+This will unregister all commands globally. There is also a per-guild equivalent:
+
+```ts
+await bot.commands.guildUnregister()
+```
 
 ### Global Command Hook
 
-You can optionally add a global command hook to your bot. This is a function that will be called before your command's `run` function.
+You can optionally add a global command hook to your bot. This is a function that will be called before your command's `run` function. It allows you to perform certain actions or make checks before _any_ command runs.
 
-- The global command hook function must return a `boolean`.
-- If `true` is returned, the initiated command will run.
+The hook receives the interaction and must return a result object:
 
-```ts
-bot.commands.setGlobalCommandHook(commandHook)
-```
+- `{ success: true }`: the initiated command will run.
+- `{ success: false, message?: string }`: the command will not run and the member gets a warning reply with `message`. If `message` is omitted, a generic message is displayed instead.
 
-This allows you to perform certain actions or make checks before _any_ command runs. For example, you could do something like this:
+For example:
 
 ```ts
-function commandHook(interaction: ChatInputCommandInteraction<"cached">) {
+import { CommandHook } from "discord-bot-shared"
+
+const commandHook: CommandHook = (interaction) => {
   if (interaction.channelId === "123456789") {
-    return true
-  } else {
-    throwUserError("This command was not initiated in the right channel.")
+    return { success: true }
   }
+  return { success: false, message: "This command was not initiated in the right channel." }
 }
 
 bot.commands.setGlobalCommandHook(commandHook)
 ```
-
-It's intended that you throw an error in the case you don't want the command to run rather than returning `false`. Otherwise, a generic error message will be displayed: `The global command hook returned false.`
-
-`throwUserError` is a special helper function. See [Error Handling](#error-handling) for more info.
 
 ## Events
 
@@ -198,7 +209,9 @@ export default logNewMember
 
 The `Client` instance is always passed as the first argument to the `handler`. The rest of the arguments will be correctly typed based on the event you specify. Also, the `handler` can be `async` if needed.
 
-### Adding and registering events
+You can optionally set `once: true` to only handle the first occurrence of the event.
+
+### Adding events
 
 You can add events to the bot like so:
 
@@ -210,66 +223,33 @@ Unlike commands, events do not need to be registered separately. They will be li
 
 ## Error Handling
 
-This package makes it much easier to handle errors that are thrown during a command or event.
-
-There are two helper functions you can import for throwing errors: `throwError` and `throwUserError`. (These also conveniently allow you to throw an error as an expression.)
-
-- `throwError(message: string)`: Throw a `new Error` with `message`.
-- `throwUserError(message: string)`: Throw a `new UserError` with `message`.
-
-The usage of these is explained below.
+Errors thrown while handling a command or event are caught by the bot, so you generally should _not_ try to catch/handle errors yourself.
 
 ### Commands
 
-**TLDR:** Use `throwError` to display an error **with the stack trace** in the interaction reply. Use `throwUserError` to display the error message **only** in the interaction reply. That means by default, any instance of `Error` thrown (say by some function you don't own), will be displayed in the interaction reply with its stack trace (which is probably what you want).
-
-When an error is thrown during a command, the interaction is replied to with the error message. For example:
+When an error is thrown during a command (from your `run` function or the global command hook), the bot replies to the interaction with an ephemeral error message containing the error's message. For example:
 
 ```ts
-import { Command, throwError } from "discord-bot-shared"
-import { SlashCommandBuilder } from "discord.js"
-
-const ping: Command = {
-  command: new SlashCommandBuilder().setName("ping").setDescription("I'll respond with pong!").toJSON(),
-  async run(interaction) {
-    if (interaction.member.id === "12345") {
-      await interaction.reply("Pong!")
-    } else {
-      throwError("Expected member with ID: 12345")
-    }
-  },
-}
-```
-
-If a member with an ID of `12345` does not initiate this command, the bot will respond with `There was an error while running this command.` along with the error **and stack trace**.
-
-In most cases, you probably want to display a clean (i.e. without the stack trace) error message. That's where `throwUserError` comes in. If this type of error is thrown, only the provided error message is displayed.
-
-As a more complete example, let's say we have some command that allows a member to level up when they have enough XP:
-
-```ts
-import { Command, throwUserError } from "discord-bot-shared"
-import { SlashCommandBuilder } from "discord.js"
+import { Command } from "discord-bot-shared"
+import { ChatInputCommandBuilder } from "discord.js"
 
 const levelUp: Command = {
-  command: new SlashCommandBuilder().setName("level-up").setDescription("Level up if you have enough XP.").toJSON(),
+  command: new ChatInputCommandBuilder().setName("level-up").setDescription("Level up if you have enough XP."),
   async run(interaction) {
     const memberXP = getMemberXP(interaction.member.id) // This might throw!
 
-    if (memberXP >= 100) {
-      levelUpMember(interaction.member.id)
-      await interaction.reply("Level up!")
-    } else {
-      throwUserError("You don't have enough XP to level up!")
+    if (memberXP < 100) {
+      throw new Error("You don't have enough XP to level up!")
     }
+
+    levelUpMember(interaction.member.id)
+    await interaction.reply("Level up!")
   },
 }
 ```
 
-- Say `getMemberXP` throws because the underlying database call fails. The member that initiated the command will get a response with the error message and stack trace (which they can then send to you so you can debug the error).
-- If the member doesn't have enough XP, they will receive the message about not having enough XP (no stack trace).
-
-**This means that you should generally _not_ try to catch/handle errors in your commands and let it be handled by the bot.**
+- If the member doesn't have enough XP, they will receive the "You don't have enough XP to level up!" message.
+- Say `getMemberXP` throws because the underlying database call fails. The member will get a reply with that error's message instead.
 
 ### Events
 
@@ -277,16 +257,13 @@ For events, all errors are caught and logged with `console.error`.
 
 ## Utilities
 
-### getChannel
+### components
 
-Returns the guild channel of the given name/ID and type, otherwise throws.
+The `components` export contains helpers that build the same error/warning messages the bot uses for its own replies. Each returns an object ready to be passed to `reply`/`editReply` (a [Components v2](https://discordjs.guide/popular-topics/display-components.html) container with the appropriate flags set).
 
 ```ts
-import { getChannel } from "discord-bot-shared"
-import { ChannelType } from "discord.js"
+import { components } from "discord-bot-shared"
 
-// guild is of type Guild from discord.js
-const someTextChannel = await getChannel(guild, "some-text-channel", ChannelType.GuildText)
+await interaction.reply(components.error("Something went wrong."))
+await interaction.followUp(components.warn("You probably don't want to do that."))
 ```
-
-Getting a properly typed channel with discord.js can be a bit of a pain, so this is an alternative.

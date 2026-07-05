@@ -1,15 +1,15 @@
-import type { Client, ClientEvents } from "discord.js"
+import type { Client, ClientEventTypes } from "discord.js"
 import type { Result } from "ts-explicit-errors"
 import { attempt, err, isErr } from "ts-explicit-errors"
 
 import type { DiscordContext } from "#/bot.ts"
 import { handleCallback } from "#/util.ts"
 
-type ValidEvents = keyof ClientEvents
+type ValidEvents = keyof ClientEventTypes
 
 type EventHandler<E extends ValidEvents = ValidEvents> = (
   client: Client,
-  ...args: ClientEvents[E]
+  ...args: ClientEventTypes[E]
 ) => void | Promise<void>
 
 type EventHandlerMap = {
@@ -45,15 +45,17 @@ export class EventManager {
 
   // generic over E so `event` and `handler` stay correlated, see microsoft/TypeScript#47109
   #listen<E extends ValidEvents>(singleEvent: SingleEvent<E>): void {
-    const handleEvent = async (...args: ClientEvents[E]): Promise<Result> => {
+    const handleEvent = async (...args: ClientEventTypes[E]): Promise<Result> => {
       const eventHandlerResult = await attempt(async () => singleEvent.handler(this.#discord.client, ...args))
       if (isErr(eventHandlerResult)) return err(`failed to handle event '${singleEvent.event}'`, eventHandlerResult)
     }
 
     const listenerType = singleEvent.once ? "once" : "on"
+    // v15's on/once listener type is a conditional that never resolves for a generic
+    // event key, so widen the key to string to hit the permissive overload
     this.#discord.client[listenerType](
-      singleEvent.event,
-      (...args) => void handleCallback(async () => handleEvent(...args)),
+      singleEvent.event as string,
+      (...args: ClientEventTypes[E]) => void handleCallback(async () => handleEvent(...args)),
     )
   }
 }

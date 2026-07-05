@@ -1,9 +1,4 @@
-import type {
-  ChatInputCommandInteraction,
-  Interaction,
-  SlashCommandBuilder,
-  SlashCommandOptionsOnlyBuilder,
-} from "discord.js"
+import type { ChatInputCommandBuilder, ChatInputCommandInteraction, Interaction } from "discord.js"
 import { Collection, Events, MessageFlags, Routes } from "discord.js"
 import type { Result } from "ts-explicit-errors"
 import { attempt, CtxError, err, filterMap, isErr } from "ts-explicit-errors"
@@ -16,7 +11,7 @@ export type CommandRunFn = (interaction: ChatInputCommandInteraction<"cached">) 
 
 export interface Command {
   requiredRoles?: string[]
-  command: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder
+  command: ChatInputCommandBuilder
   run: CommandRunFn
 }
 
@@ -55,7 +50,7 @@ export class CommandManager {
    * Add a command
    */
   public add(command: Command): void {
-    this.#commands.set(command.command.name, command)
+    this.#commands.set(command.command.toJSON().name, command)
   }
 
   public setGlobalCommandHook(commandHook: CommandHook): void {
@@ -210,7 +205,7 @@ export class CommandManager {
       if (isErr(commandRunResult)) {
         return CommandManager.interactionErrorReply(
           interaction,
-          err(`failed to run command \`${command.command.name}\``, commandRunResult),
+          err(`failed to run command \`${interaction.commandName}\``, commandRunResult),
         )
       }
     }
