@@ -1,3 +1,9 @@
+## [1.0.1](https://github.com/adamhl8/discord-bot-shared/compare/v1.0.0..v1.0.1) - 2026-07-11
+
+### ⚙️ Miscellaneous Tasks
+
+- update tooling ([4b588de](https://github.com/adamhl8/discord-bot-shared/commit/4b588ded993cb820097549706bb30e447e6c760b) by @adamhl8)
+
 ## [1.0.0](https://github.com/adamhl8/discord-bot-shared/compare/v0.18.0..v1.0.0) - 2026-07-05
 
 ### ✨ Improvements
