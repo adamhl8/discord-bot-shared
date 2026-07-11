@@ -3,8 +3,8 @@ import type { ClientOptions } from "discord.js"
 import { Client, Events, REST } from "discord.js"
 import { attempt, isErr } from "ts-explicit-errors"
 
-import { CommandManager } from "#/command-manager.ts"
-import { EventManager } from "#/event-manager.ts"
+import { CommandManager } from "#command-manager.ts"
+import { EventManager } from "#event-manager.ts"
 
 interface BotOptions {
   applicationId: string

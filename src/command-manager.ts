@@ -3,9 +3,9 @@ import { Collection, Events, MessageFlags, Routes } from "discord.js"
 import type { Result } from "ts-explicit-errors"
 import { attempt, CtxError, err, filterMap, isErr } from "ts-explicit-errors"
 
-import type { DiscordContext } from "#/bot.ts"
-import { components } from "#/components.ts"
-import { handleCallback } from "#/util.ts"
+import type { DiscordContext } from "#bot.ts"
+import { components } from "#components.ts"
+import { handleCallback } from "#util.ts"
 
 export type CommandRunFn = (interaction: ChatInputCommandInteraction<"cached">) => void | Promise<void>
 

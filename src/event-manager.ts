@@ -2,8 +2,8 @@ import type { Client, ClientEventTypes } from "discord.js"
 import type { Result } from "ts-explicit-errors"
 import { attempt, err, isErr } from "ts-explicit-errors"
 
-import type { DiscordContext } from "#/bot.ts"
-import { handleCallback } from "#/util.ts"
+import type { DiscordContext } from "#bot.ts"
+import { handleCallback } from "#util.ts"
 
 type ValidEvents = keyof ClientEventTypes
 
