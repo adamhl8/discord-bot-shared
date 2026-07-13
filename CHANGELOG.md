@@ -1,3 +1,9 @@
+## [1.0.2](https://github.com/adamhl8/discord-bot-shared/compare/v1.0.1..v1.0.2) - 2026-07-13
+
+### ⚙️ Miscellaneous Tasks
+
+- _(deps)_ update dependencies ([8737a45](https://github.com/adamhl8/discord-bot-shared/commit/8737a4536f60c8e0e62905a1735edaec82105cbb) by @adamhl8)
+
 ## [1.0.1](https://github.com/adamhl8/discord-bot-shared/compare/v1.0.0..v1.0.1) - 2026-07-11
 
 ### ⚙️ Miscellaneous Tasks
