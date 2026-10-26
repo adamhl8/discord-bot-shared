@@ -1,7 +1,8 @@
-import type { ChatInputCommandBuilder, ChatInputCommandInteraction, Interaction } from "discord.js"
+import type { ChatInputCommandBuilder } from "@discordjs/builders"
+import type { ChatInputCommandInteraction, Interaction } from "discord.js"
 import { Collection, Events, MessageFlags, Routes } from "discord.js"
 import type { Result } from "ts-explicit-errors"
-import { attempt, CtxError, err, filterMap, isErr } from "ts-explicit-errors"
+import { attempt, err, filterMap, isErr, messageChain } from "ts-explicit-errors"
 
 import type { DiscordContext } from "#bot.ts"
 import { components } from "#components.ts"
@@ -65,7 +66,7 @@ export class CommandManager {
       console.log(`Globally registered ${this.#commands.size.toString()} (/) commands.`)
     })
 
-    if (isErr(registerResult)) console.error(`failed to register global commands: ${registerResult.messageChain}`)
+    if (isErr(registerResult)) console.error(`failed to register global commands: ${messageChain(registerResult)}`)
   }
 
   public async unregister(): Promise<void> {
@@ -76,7 +77,8 @@ export class CommandManager {
       console.log("Unregistered global commands.")
     })
 
-    if (isErr(unregisterResult)) console.error(`failed to unregister global commands: ${unregisterResult.messageChain}`)
+    if (isErr(unregisterResult))
+      console.error(`failed to unregister global commands: ${messageChain(unregisterResult)}`)
   }
 
   public async guildRegister() {
@@ -233,10 +235,10 @@ export class CommandManager {
 
   private static async interactionErrorReply(
     interaction: ChatInputCommandInteraction,
-    error: string | CtxError,
+    error: string | Error,
     type: keyof typeof components = "error",
   ): Promise<Result> {
-    const errorMessage = error instanceof CtxError ? error.messageChain : error
+    const errorMessage = typeof error === "string" ? error : messageChain(error)
     const errorComponent = components[type](errorMessage)
 
     const reply = await attempt(async () =>

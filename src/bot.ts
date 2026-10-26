@@ -1,7 +1,7 @@
-// oxlint-disable no-underscore-dangle
+// oxlint-disable no-underscore-dangle - `_listen` is public for `Bot` but not meant for consumers
 import type { ClientOptions } from "discord.js"
 import { Client, Events, REST } from "discord.js"
-import { attempt, isErr } from "ts-explicit-errors"
+import { attempt, isErr, messageChain } from "ts-explicit-errors"
 
 import { CommandManager } from "#command-manager.ts"
 import { EventManager } from "#event-manager.ts"
@@ -46,7 +46,7 @@ export class Bot {
     this.events._listen()
 
     const loginResult = await attempt(async () => this.#discord.client.login(this.#discord.token))
-    if (isErr(loginResult)) console.error(`failed to login: ${loginResult.messageChain}`)
+    if (isErr(loginResult)) console.error(`failed to login: ${messageChain(loginResult)}`)
   }
 
   public async logout(): Promise<void> {

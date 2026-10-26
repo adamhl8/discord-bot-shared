@@ -1,4 +1,5 @@
-import { ContainerBuilder, MessageFlags, SeparatorSpacingSize } from "discord.js"
+import { ContainerBuilder } from "@discordjs/builders"
+import { MessageFlags, SeparatorSpacingSize } from "discord.js"
 
 const error = (message: string) =>
   ({

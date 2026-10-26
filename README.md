@@ -27,10 +27,10 @@ A small package that makes creating [discord.js](https://github.com/discordjs/di
 
 ## Installation
 
-Requires discord.js v15.
+Requires discord.js v15 and `@discordjs/builders` v2.
 
 ```sh
-npm install discord-bot-shared discord.js
+npm install discord-bot-shared discord.js @discordjs/builders
 ```
 
 ## Quick Start
@@ -40,8 +40,8 @@ Let's create a simple bot with one slash command.
 In **`ping.ts`:**
 
 ```ts
+import { ChatInputCommandBuilder } from "@discordjs/builders"
 import { Command } from "discord-bot-shared"
-import { ChatInputCommandBuilder } from "discord.js"
 
 const ping: Command = {
   command: new ChatInputCommandBuilder().setName("ping").setDescription("I'll respond with pong!"),
@@ -106,8 +106,8 @@ await bot.logout()
 Commands can be created by constructing `Command` objects that will be added to the bot later.
 
 ```ts
+import { ChatInputCommandBuilder } from "@discordjs/builders"
 import { Command } from "discord-bot-shared"
-import { ChatInputCommandBuilder } from "discord.js"
 
 const ping: Command = {
   command: new ChatInputCommandBuilder().setName("ping").setDescription("I'll respond with pong!"),
@@ -230,8 +230,8 @@ Errors thrown while handling a command or event are caught by the bot, so you ge
 When an error is thrown during a command (from your `run` function or the global command hook), the bot replies to the interaction with an ephemeral error message containing the error's message. For example:
 
 ```ts
+import { ChatInputCommandBuilder } from "@discordjs/builders"
 import { Command } from "discord-bot-shared"
-import { ChatInputCommandBuilder } from "discord.js"
 
 const levelUp: Command = {
   command: new ChatInputCommandBuilder().setName("level-up").setDescription("Level up if you have enough XP."),
