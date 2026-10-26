@@ -1,6 +1,6 @@
 {
   "name": "discord-bot-shared",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Modules for creating discord bots",
   "keywords": [
     "bot",

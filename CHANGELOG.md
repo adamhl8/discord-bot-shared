@@ -1,3 +1,11 @@
+## [1.0.3](https://github.com/adamhl8/discord-bot-shared/compare/v1.0.2..v1.0.3) - 2026-10-26
+
+### ⚙️ Miscellaneous Tasks
+
+- _(deps)_ update dependencies ([2823641](https://github.com/adamhl8/discord-bot-shared/commit/2823641c2fa7e4e9880c3880d0d0b44481b0d4a1) by @adamhl8)
+
+- _(tsdown)_ remove failOnWarn override ([875eeb9](https://github.com/adamhl8/discord-bot-shared/commit/875eeb964a4d5ef04737f6b9092aec2710a4b4b7) by @adamhl8)
+
 ## [1.0.2](https://github.com/adamhl8/discord-bot-shared/compare/v1.0.1..v1.0.2) - 2026-07-13
 
 ### ⚙️ Miscellaneous Tasks
